@@ -25,6 +25,14 @@ public class Move {
         return targetColumns;
     }
 
+    public Move(int sourceRow, int sourceColumns, int targetRow, int targetColumns, Board board) {
+        this.sourceRow = sourceRow;
+        this.sourceColumns = sourceColumns;
+        this.targetRow = targetRow;
+        this.targetColumns = targetColumns;
+        if(Move.board != null)
+            Move.board = board;
+    }
 
     public Piece getPiece(int r, int c){
         return board.getTile(r, c).getPiece();
@@ -39,10 +47,37 @@ public class Move {
     }
 
     public boolean checkPiecePresence(int r, int c){
-        return board.getTile(r, c).getPiece() != null;
+        return getPiece(r, c) != null;
     }
 
     public void wouldEndInKingCheck(){}
 
-    //Punto 6 DA IMPLEMENTARE
+    public boolean isTargetOccupiedByAlly(){
+        Piece p = getPiece(targetRow, targetColumns);
+        if(p != null)
+            return getPiece(sourceRow, sourceColumns).getColor() == p.getColor();
+        return false;
+    }
+
+    public boolean isKingInCheck(int kingRow, int kingColumn, Color kingColor){
+        return false;
+    }
+
+    public boolean checkObstacles(){
+        int r = sourceRow;
+        int c = sourceColumns;
+
+        boolean rCheck = r < targetRow,
+                cCheck = c < targetColumns;
+
+        while(!onTarget(r, c)){
+            if(getPiece(r, c) != null)
+                return true;
+
+            r += rCheck && (r != targetRow) ? 1 : -1;
+            c += cCheck && (c != targetColumns) ? 1 : -1;
+        }
+
+        return false;
+    }
 }
