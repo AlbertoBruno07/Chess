@@ -8,6 +8,14 @@ public class Board {
     static final int LastRow = Rows-1;
     static final int LastColumn = Columns -1;
 
+    public static int getRows(){
+        return Rows;
+    }
+
+    public static int getColumns(){
+        return Columns;
+    }
+
     public Board() {
         board = new Tile[Rows][Columns];
 

@@ -70,12 +70,12 @@ public class Move {
         boolean rCheck = r < targetRow,
                 cCheck = c < targetColumns;
 
-        while(!onTarget(r, c)){
+        while(!onTarget(r, c) && getPiece(r,c).getType() != PieceType.KNIGHT){
             if(getPiece(r, c) != null)
                 return true;
 
-            r += rCheck && (r != targetRow) ? 1 : -1;
-            c += cCheck && (c != targetColumns) ? 1 : -1;
+            r += (r != targetRow) ? (rCheck ? 1 : -1) : 0;
+            c += (c != targetColumns) ? (cCheck ? 1 : -1) : 0;
         }
 
         return false;

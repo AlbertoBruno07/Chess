@@ -32,7 +32,7 @@ public abstract class Piece {
         if(m.getSourceColumns() == m.getTargetColumns() || m.getSourceRow() == m.getTargetRow())
             throw new InvalidMoveException("User specified a move with same source and destination");
         if(m.isTargetOccupiedByAlly())
-            throw new InvalidMoveException("User specified a move that would end on another piece of its army!")
+            throw new InvalidMoveException("User specified a move that would end on another piece of its army!");
     }
     void executeMove(Move m){}
     boolean validateCapture(Move m){
