@@ -43,7 +43,7 @@ public class Game {
         row = color == Color.BLACK ? 1 : Board.getRows()-2;
         for(int i = 0; i < Board.getColumns(); i++){
             arrayList.add(new Pawn(color));
-            board.getTile(row,3).setPiece(arrayList.getLast());
+            board.getTile(row,i).setPiece(arrayList.getLast());
         }
     }
 

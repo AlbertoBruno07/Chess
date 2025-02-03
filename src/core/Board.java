@@ -21,7 +21,7 @@ public class Board {
 
         for(int i = 0; i < Rows; i++)
             for(int j = 0; j < Columns; j++)
-                board[i][j] = new Tile(i, j, ((i*Columns)+j)%2==0?Color.WHITE:Color.BLACK);
+                board[i][j] = new Tile(i, j, ((i*(Columns-1))+j)%2==0?Color.WHITE:Color.BLACK);
     }
 
     //It is not really useful the static declaration
