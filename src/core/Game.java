@@ -17,29 +17,33 @@ public class Game {
     }
 
     private void createArmy(ArrayList<Piece> arrayList, Color color){
+        
+        int row = color == Color.BLACK ? 0 : Board.getRows()-1;
+
         arrayList.add(new Rook(color));
-        board.getTile(color == Color.BLACK ? 0 : Board.getRows()-1,0).setPiece(arrayList.getLast());
+        board.getTile(row,0).setPiece(arrayList.getLast());
         arrayList.add(new Rook(color));
-        board.getTile(color == Color.BLACK ? 0 : Board.getRows()-1,7).setPiece(arrayList.getLast());
+        board.getTile(row,7).setPiece(arrayList.getLast());
 
         arrayList.add(new Knight(color));
-        board.getTile(color == Color.BLACK ? 0 : Board.getRows()-1,1).setPiece(arrayList.getLast());
+        board.getTile(row,1).setPiece(arrayList.getLast());
         arrayList.add(new Knight(color));
-        board.getTile(color == Color.BLACK ? 0 : Board.getRows()-1,6).setPiece(arrayList.getLast());
+        board.getTile(row,6).setPiece(arrayList.getLast());
 
         arrayList.add(new Bishop(color));
-        board.getTile(color == Color.BLACK ? 0 : Board.getRows()-1,2).setPiece(arrayList.getLast());
+        board.getTile(row,2).setPiece(arrayList.getLast());
         arrayList.add(new Bishop(color));
-        board.getTile(color == Color.BLACK ? 0 : Board.getRows()-1,5).setPiece(arrayList.getLast());
+        board.getTile(row,5).setPiece(arrayList.getLast());
 
         arrayList.add(new King(color));
-        board.getTile(color == Color.BLACK ? 0 : Board.getRows()-1,3).setPiece(arrayList.getLast());
+        board.getTile(row,3).setPiece(arrayList.getLast());
         arrayList.add(new Queen(color));
-        board.getTile(color == Color.BLACK ? 0 : Board.getRows()-1,4).setPiece(arrayList.getLast());
+        board.getTile(row,4).setPiece(arrayList.getLast());
 
+        row = color == Color.BLACK ? 1 : Board.getRows()-2;
         for(int i = 0; i < Board.getColumns(); i++){
             arrayList.add(new Pawn(color));
-            board.getTile(color == Color.BLACK ? 1 : Board.getRows()-2,3).setPiece(arrayList.getLast());
+            board.getTile(row,3).setPiece(arrayList.getLast());
         }
     }
 
@@ -62,17 +66,47 @@ public class Game {
         return board;
     }
 
-    public void removePieceFromArmy(Piece piece, Color color){
-        if(color == Color.WHITE)
+    public void removePieceFromArmy(Piece piece){
+        if(piece.color == Color.WHITE)
             whiteArmy.remove(piece);
         else
             blackArmy.remove(piece);
     }
 
-    public void addPieceToArmy(Piece piece, Color color){
-        if(color == Color.WHITE)
+    public void addPieceToArmy(Piece piece){
+        if(piece.color == Color.WHITE)
             whiteArmy.add(piece);
         else
             blackArmy.add(piece);
     }
+
+    public boolean isMoveSourceValid(int r, int c){
+        if(board.getTile(r, c).getPiece() == null)
+            return false;
+
+        if(board.getTile(r, c).getPiece().color != turn)
+            return false;
+
+        return true;
+    }
+
+    public boolean processMove(int sR, int sC,
+                               int tR, int tC){
+        Move move = new Move(sR, sC, tR, tC, board);
+
+        try{
+            board.getPiece(sR, sC).validateMove(move);
+            move.wouldEndInKingCheck();
+            board.getPiece(sR, sC).executeMove(move);
+            if(board.getPiece(sR, sC).color == board.getPiece(tR, tC).color)
+                return false;
+            if(board.getPiece(tR, tC) != null)
+                removePieceFromArmy(board.getPiece(tR, tC));
+            return true;
+        } catch(InvalidMoveException ime){
+            System.out.println(ime);
+            return false;
+        }
+    }
+
 }

@@ -39,4 +39,8 @@ public class Board {
 
         return board[r][c];
     }
+
+    public Piece getPiece(int r, int c){
+        return getTile(r, c).getPiece();
+    }
 }
