@@ -30,7 +30,7 @@ public class Move {
         this.sourceColumns = sourceColumns;
         this.targetRow = targetRow;
         this.targetColumns = targetColumns;
-        if(Move.board != null)
+        if(Move.board == null)
             Move.board = board;
     }
 
@@ -70,13 +70,15 @@ public class Move {
         boolean rCheck = r < targetRow,
                 cCheck = c < targetColumns;
 
-        while(!onTarget(r, c) && getPiece(r,c).getType() != PieceType.KNIGHT){
-            if(getPiece(r, c) != null)
-                return true;
+        if(getPiece(r, c).getType() != PieceType.KNIGHT)
+            while(!onTarget(r, c)){
+                r += (r != targetRow) ? (rCheck ? 1 : -1) : 0;
+                c += (c != targetColumns) ? (cCheck ? 1 : -1) : 0;
 
-            r += (r != targetRow) ? (rCheck ? 1 : -1) : 0;
-            c += (c != targetColumns) ? (cCheck ? 1 : -1) : 0;
-        }
+                if(getPiece(r, c) != null)
+                    return !((r == targetRow) && (c == targetColumns));
+
+            }
 
         return false;
     }

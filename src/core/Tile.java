@@ -5,13 +5,6 @@ public class Tile {
     private Piece piece;
     private Color color;
 
-    public Tile(int row, int column, Piece piece, Color color) {
-        this.row = row;
-        this.column = column;
-        this.piece = piece;
-        this.color = color;
-    }
-
     public Tile(int row, int column, Color color) {
         this.row = row;
         this.column = column;

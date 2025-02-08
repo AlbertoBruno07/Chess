@@ -2,6 +2,8 @@ package core;
 
 import java.util.Objects;
 
+import static java.lang.Math.abs;
+
 public abstract class Piece {
 
     protected Color color;
@@ -10,6 +12,12 @@ public abstract class Piece {
     public Piece(Color color, PieceType type) {
         this.color = color;
         this.type = type;
+    }
+
+    public boolean orthogonalMove(Move m){
+        return ((m.getSourceRow() == m.getTargetRow() ||
+                m.getSourceColumns() == m.getTargetColumns()) &&
+            !m.checkObstacles());
     }
 
     public Color getColor() {
@@ -29,7 +37,7 @@ public abstract class Piece {
     }
 
     void validateMove(Move m){
-        if(m.getSourceColumns() == m.getTargetColumns() || m.getSourceRow() == m.getTargetRow())
+        if(m.getSourceColumns() == m.getTargetColumns() && m.getSourceRow() == m.getTargetRow())
             throw new InvalidMoveException("User specified a move with same source and destination");
         if(m.isTargetOccupiedByAlly())
             throw new InvalidMoveException("User specified a move that would end on another piece of its army!");
@@ -57,5 +65,11 @@ public abstract class Piece {
                 "color=" + color +
                 ", type=" + type +
                 '}';
+    }
+
+    protected boolean diagonalMove(Move m) {
+        return ((abs(m.getSourceColumns() - m.getTargetColumns()) ==
+                abs(m.getSourceRow() - m.getTargetRow()))
+                && !m.checkObstacles());
     }
 }

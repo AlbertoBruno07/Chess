@@ -80,7 +80,6 @@ public class BoardPanel extends JPanel {
 
     public void drawPiece(int r, int c, PieceType pT, Color color){
         String iconName = "icons/" + (color == Color.WHITE ? "W" : "B") + letterForPiece(pT) + ".png";
-        System.out.println(r + " " + c + " " + iconName);
         URL url = getClass().getClassLoader().getResource(iconName);
         Image image = new ImageIcon(url).getImage();
         image = image.getScaledInstance(TILE_DIMENSION, TILE_DIMENSION,
@@ -109,19 +108,19 @@ public class BoardPanel extends JPanel {
                 highlightSourceTile(r, c);
                 sourceRow = r;
                 sourceColumn = c;
-            } else{
-                moveIsOnGoing = false;
-                processMove(sourceRow, sourceColumn, r, c);
-                unhighlightSourceTile(sourceRow, sourceColumn);
             }
+        } else{
+            moveIsOnGoing = false;
+            processMove(sourceRow, sourceColumn, r, c);
+            unhighlightSourceTile(sourceRow, sourceColumn);
         }
     }
 
-    private void processMove(int sourceRow, int sourceColumn, int tileRow, int tileColumn) {
-        if(game.processMove(sourceRow, sourceColumn, tileRow, tileColumn)){
-            Piece sP = game.getBoard().getPiece(sourceRow, sourceColumn);
+    private void processMove(int sourceRow, int sourceColumn, int targetRow, int targetColumn) {
+        if(game.processMove(sourceRow, sourceColumn, targetRow, targetColumn)){
+            Piece sP = game.getBoard().getPiece(targetRow, targetColumn);
             clearPiece(sourceRow, sourceColumn);
-            drawPiece(tileRow, tileColumn, sP.getType(), sP.getColor());
+            drawPiece(targetRow, targetColumn, sP.getType(), sP.getColor());
         }
     }
 }

@@ -36,9 +36,9 @@ public class Game {
         board.getTile(row,5).setPiece(arrayList.getLast());
 
         arrayList.add(new King(color));
-        board.getTile(row,3).setPiece(arrayList.getLast());
-        arrayList.add(new Queen(color));
         board.getTile(row,4).setPiece(arrayList.getLast());
+        arrayList.add(new Queen(color));
+        board.getTile(row,3).setPiece(arrayList.getLast());
 
         row = color == Color.BLACK ? 1 : Board.getRows()-2;
         for(int i = 0; i < Board.getColumns(); i++){
@@ -98,10 +98,13 @@ public class Game {
             board.getPiece(sR, sC).validateMove(move);
             move.wouldEndInKingCheck();
             board.getPiece(sR, sC).executeMove(move);
-            if(board.getPiece(sR, sC).color == board.getPiece(tR, tC).color)
-                return false;
-            if(board.getPiece(tR, tC) != null)
+            if(board.getPiece(tR, tC) != null) {
+                if (board.getPiece(sR, sC).color == board.getPiece(tR, tC).color)
+                    return false;
                 removePieceFromArmy(board.getPiece(tR, tC));
+            }
+            board.getTile(tR, tC).setPiece(board.getPiece(sR, sC));
+            board.getTile(sR, sC).setPiece(null);
             return true;
         } catch(InvalidMoveException ime){
             System.out.println(ime);
