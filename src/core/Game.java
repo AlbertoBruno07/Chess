@@ -97,7 +97,6 @@ public class Game {
         try{
             board.getPiece(sR, sC).validateMove(move);
             move.wouldEndInKingCheck();
-            board.getPiece(sR, sC).executeMove(move);
             if(board.getPiece(tR, tC) != null) {
                 if (board.getPiece(sR, sC).color == board.getPiece(tR, tC).color)
                     return false;
@@ -105,11 +104,16 @@ public class Game {
             }
             board.getTile(tR, tC).setPiece(board.getPiece(sR, sC));
             board.getTile(sR, sC).setPiece(null);
+            switchTurn();
             return true;
         } catch(InvalidMoveException ime){
             System.out.println(ime);
             return false;
         }
+    }
+
+    private void switchTurn() {
+        turn = (turn == Color.WHITE) ? Color.BLACK : Color.WHITE;
     }
 
 }

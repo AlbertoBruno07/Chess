@@ -14,12 +14,6 @@ public abstract class Piece {
         this.type = type;
     }
 
-    public boolean orthogonalMove(Move m){
-        return ((m.getSourceRow() == m.getTargetRow() ||
-                m.getSourceColumns() == m.getTargetColumns()) &&
-            !m.checkObstacles());
-    }
-
     public Color getColor() {
         return color;
     }
@@ -71,5 +65,44 @@ public abstract class Piece {
         return ((abs(m.getSourceColumns() - m.getTargetColumns()) ==
                 abs(m.getSourceRow() - m.getTargetRow()))
                 && !m.checkObstacles());
+    }
+
+    public boolean orthogonalMove(Move m){
+        return ((m.getSourceRow() == m.getTargetRow() ||
+                m.getSourceColumns() == m.getTargetColumns()) &&
+                !m.checkObstacles());
+    }
+
+    public boolean jumpMove(Move m){
+        int dC = (abs(m.getSourceColumns() - m.getTargetColumns()))+1;
+        int dR = (abs(m.getSourceRow() - m.getTargetRow()))+1;
+        return ((dC*dC)+(dR*dR)) == 13;
+    }
+
+    protected boolean tryForwardMove(Move m, int offset){
+        return m.getSourceColumns() == m.getTargetColumns()
+                && m.getTargetRow() - m.getSourceRow() == (
+                m.getPiece(m.getSourceRow(), m.getSourceColumns()).color == Color.BLACK
+                ? offset : offset * -1);
+    }
+
+    protected boolean pawnMove(Move m, boolean fM) {
+        if(m.getPiece(m.getTargetRow(), m.getTargetColumns()) != null)
+            return (abs(m.getSourceRow() - m.getTargetRow()) == 1 && abs(m.getSourceColumns() - m.getTargetColumns()) == 1);
+
+        if(m.getTargetColumns() != m.getSourceColumns())
+            return false;
+
+        if(fM)
+            if(tryForwardMove(m, 2))
+                return true;
+
+        return tryForwardMove(m, 1);
+
+    }
+
+    protected boolean trySingleStepMove(Move m) {
+        return (abs(m.getSourceRow()-m.getTargetRow()) <= 1) &&
+                (abs(m.getSourceColumns() - m.getTargetColumns())) <= 1;
     }
 }

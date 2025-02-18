@@ -118,9 +118,9 @@ public class BoardPanel extends JPanel {
 
     private void processMove(int sourceRow, int sourceColumn, int targetRow, int targetColumn) {
         if(game.processMove(sourceRow, sourceColumn, targetRow, targetColumn)){
-            Piece sP = game.getBoard().getPiece(targetRow, targetColumn);
+            Piece tP = game.getBoard().getPiece(targetRow, targetColumn);
             clearPiece(sourceRow, sourceColumn);
-            drawPiece(targetRow, targetColumn, sP.getType(), sP.getColor());
+            drawPiece(targetRow, targetColumn, tP.getType(), tP.getColor());
         }
     }
 }

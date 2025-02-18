@@ -50,7 +50,9 @@ public class Move {
         return getPiece(r, c) != null;
     }
 
-    public void wouldEndInKingCheck(){}
+    public void wouldEndInKingCheck(){
+
+    }
 
     public boolean isTargetOccupiedByAlly(){
         Piece p = getPiece(targetRow, targetColumns);
