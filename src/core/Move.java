@@ -9,6 +9,8 @@ public class Move {
     private int targetRow;
     private int targetColumns;
 
+    Piece sourcePiece, targetPiece;
+
     public int getSourceRow() {
         return sourceRow;
     }
@@ -32,6 +34,16 @@ public class Move {
         this.targetColumns = targetColumns;
         if(Move.board == null)
             Move.board = board;
+        sourcePiece = board.getPiece(sourceRow, sourceColumns);
+        targetPiece = board.getPiece(targetRow, targetColumns);
+    }
+
+    public Piece getSourcePiece() {
+        return sourcePiece;
+    }
+
+    public Piece getTargetPiece() {
+        return targetPiece;
     }
 
     public Piece getPiece(int r, int c){
@@ -48,10 +60,6 @@ public class Move {
 
     public boolean checkPiecePresence(int r, int c){
         return getPiece(r, c) != null;
-    }
-
-    public void wouldEndInKingCheck(){
-
     }
 
     public boolean isTargetOccupiedByAlly(){

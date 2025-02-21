@@ -24,8 +24,7 @@ public class Board {
                 board[i][j] = new Tile(i, j, ((i*(Columns-1))+j)%2==0?Color.WHITE:Color.BLACK);
     }
 
-    //It is not really useful the static declaration
-    private static boolean IndexOutOfRange(int r, int c){
+    public static boolean IndexOutOfRange(int r, int c){
         if(r < 0 || r > LastRow)
             return true;
         if(c < 0 || c > LastColumn)

@@ -8,10 +8,24 @@ public abstract class Piece {
 
     protected Color color;
     protected PieceType type;
+    protected int r, c;
 
     public Piece(Color color, PieceType type) {
         this.color = color;
         this.type = type;
+    }
+
+    public int getPosR(){
+        return r;
+    }
+
+    public int getPosC(){
+        return c;
+    }
+
+    public void updatePos(int r, int c){
+        this.r = r;
+        this.c = c;
     }
 
     public Color getColor() {

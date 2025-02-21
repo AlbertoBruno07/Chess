@@ -15,12 +15,13 @@ public class Pawn extends Piece{
 
         if(!super.pawnMove(m, firstMove))
             throw new InvalidMoveException("Invalid Move!");
-
-        if(firstMove)
-            updateEp();
     }
 
-    private void updateEp() {
+    public boolean isFirstMove(){
+        return firstMove;
+    }
+
+    public void updateEp() {
         firstMove = false;
     }
 }

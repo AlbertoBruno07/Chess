@@ -8,12 +8,21 @@ public class Game {
     private ArrayList<Piece> blackArmy, whiteArmy;
     private Board board;
 
+    private BackgroundOverlay backgroundOverlay;
+
+    public BackgroundOverlay getBackgroundOverlay() {
+        return backgroundOverlay;
+    }
+
     public Game() {
         turn = Color.WHITE;
         blackArmy = new ArrayList<>();
         whiteArmy = new ArrayList<>();
         board = new Board();
         setup();
+        backgroundOverlay = new BackgroundOverlay(board);
+        backgroundOverlay.setKing((King)board.getPiece(0, 4), Color.BLACK);
+        backgroundOverlay.setKing((King)board.getPiece(7, 4), Color.WHITE);
     }
 
     private void createArmy(ArrayList<Piece> arrayList, Color color){
@@ -96,7 +105,7 @@ public class Game {
 
         try{
             board.getPiece(sR, sC).validateMove(move);
-            move.wouldEndInKingCheck();
+            //move.wouldEndInKingCheck(backgroundOverlay);
             if(board.getPiece(tR, tC) != null) {
                 if (board.getPiece(sR, sC).color == board.getPiece(tR, tC).color)
                     return false;
@@ -104,7 +113,11 @@ public class Game {
             }
             board.getTile(tR, tC).setPiece(board.getPiece(sR, sC));
             board.getTile(sR, sC).setPiece(null);
+            backgroundOverlay.wouldEndInKingCheck(move);
             switchTurn();
+            backgroundOverlay.processMove(move);
+            if(board.getPiece(tR, tC).type == PieceType.PAWN)
+                ((Pawn)board.getPiece(tR, tC)).updateEp();
             return true;
         } catch(InvalidMoveException ime){
             System.out.println(ime);

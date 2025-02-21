@@ -18,6 +18,8 @@ public class Tile {
 
     public void setPiece(Piece piece) {
         this.piece = piece;
+        if(piece != null)
+            piece.updatePos(row, column);
     }
 
     public Color getColor() {
