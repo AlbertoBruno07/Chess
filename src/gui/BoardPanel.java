@@ -115,9 +115,9 @@ public class BoardPanel extends JPanel {
             unhighlightSourceTile(sourceRow, sourceColumn);
             kingIsInCheck(game.getTurn());
             Color inverseTurn = game.turn == Color.WHITE ? Color.BLACK : Color.WHITE;
-            tiles[game.getBackgroundOverlay().getKingR(inverseTurn)][game.getBackgroundOverlay().getKingC(inverseTurn)]
-                    .setBackground(determineTileColor(game.getBackgroundOverlay().getKingR(inverseTurn),
-                                    game.getBackgroundOverlay().getKingC(inverseTurn)));
+            tiles[BackgroundOverlay.getKingR(inverseTurn)][BackgroundOverlay.getKingC(inverseTurn)]
+                    .setBackground(determineTileColor(BackgroundOverlay.getKingR(inverseTurn),
+                                    BackgroundOverlay.getKingC(inverseTurn)));
             //The king position could have been changed, but this is not a problem since
             //that means it has been moved, so unhighlightSourceTile will clear that tile automatically
         }
@@ -132,7 +132,7 @@ public class BoardPanel extends JPanel {
     }
 
     public void kingIsInCheck(Color c){
-        if(game.getBackgroundOverlay().isKingInCheck(c))
-            tiles[game.getBackgroundOverlay().getKingR(c)][game.getBackgroundOverlay().getKingC(c)].setBackground(java.awt.Color.RED);
+        if(BackgroundOverlay.isKingInCheck(c))
+            tiles[BackgroundOverlay.getKingR(c)][BackgroundOverlay.getKingC(c)].setBackground(java.awt.Color.RED);
     }
 }

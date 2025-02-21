@@ -20,9 +20,9 @@ public class Game {
         whiteArmy = new ArrayList<>();
         board = new Board();
         setup();
-        backgroundOverlay = new BackgroundOverlay(board);
-        backgroundOverlay.setKing((King)board.getPiece(0, 4), Color.BLACK);
-        backgroundOverlay.setKing((King)board.getPiece(7, 4), Color.WHITE);
+        backgroundOverlay = BackgroundOverlay.getInstance(board);
+        BackgroundOverlay.setKing((King)board.getPiece(0, 4), Color.BLACK);
+        BackgroundOverlay.setKing((King)board.getPiece(7, 4), Color.WHITE);
     }
 
     private void createArmy(ArrayList<Piece> arrayList, Color color){
@@ -113,9 +113,9 @@ public class Game {
             }
             board.getTile(tR, tC).setPiece(board.getPiece(sR, sC));
             board.getTile(sR, sC).setPiece(null);
-            backgroundOverlay.wouldEndInKingCheck(move);
+            BackgroundOverlay.wouldEndInKingCheck(move);
             switchTurn();
-            backgroundOverlay.processMove(move);
+            BackgroundOverlay.processMove(move);
             if(board.getPiece(tR, tC).type == PieceType.PAWN)
                 ((Pawn)board.getPiece(tR, tC)).updateEp();
             return true;

@@ -119,4 +119,6 @@ public abstract class Piece {
         return (abs(m.getSourceRow()-m.getTargetRow()) <= 1) &&
                 (abs(m.getSourceColumns() - m.getTargetColumns())) <= 1;
     }
+
+    public void pieceInsertion(Board board, int r, int c){}
 }
