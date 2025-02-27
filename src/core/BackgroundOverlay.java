@@ -2,7 +2,7 @@ package core;
 
 import java.util.*;
 
-import static java.lang.Math.abs;
+import static java.lang.Math.signum;
 
 public class BackgroundOverlay {
 
@@ -14,13 +14,21 @@ public class BackgroundOverlay {
     private static King blackKing;
 
     private BackgroundOverlay(Board board) {
-        this.board = board;
+        BackgroundOverlay.board = board;
 
         blackPossibleMove = new ArrayList<ArrayList<ArrayList<Piece>>>();
         whitePossibleMove = new ArrayList<ArrayList<ArrayList<Piece>>>();
 
         createArmies();
         initialize();
+    }
+
+    public static King getWhiteKing() {
+        return whiteKing;
+    }
+
+    public static King getBlackKing() {
+        return blackKing;
     }
 
     public static BackgroundOverlay getInstance(Board board){
@@ -54,18 +62,76 @@ public class BackgroundOverlay {
             return blackKing.getPosC();
     }
 
+    public static boolean checkMate(Color color){
+        ArrayList<ArrayList<ArrayList<Piece>>> enemyArmy = (color == Color.BLACK) ? whitePossibleMove : blackPossibleMove;
+        Piece king = (color == Color.WHITE) ? whiteKing : blackKing;
+        int r = king.getPosR(), c = king.getPosC();
+
+        if(!isPieceMenaced(king))
+            return false;
+
+        for(int i = -1; i <= 1; i++)
+            for(int j = -1; j <= 1; j++)
+                if(!Board.IndexOutOfRange(r+i, c+j)) {
+                    if (tileIsNotOccupiedByAlly(r + i, c + j, color)) {
+                        Move m = new Move(r, c, r + i, c + j, board);
+                        board.getTile(r+i, c+j).setPiece(king);
+                        board.getTile(r, c).setPiece(null);
+                        try {
+                            wouldEndInKingCheck(m);
+                            board.getTile(r+i, c+j).setPiece(m.getTargetPiece());
+                            board.getTile(r, c).setPiece(king);
+                            return false;
+                        } catch (Exception e) {}
+                    }
+                }
+
+        //Means that we cannot eat the pawn but we are also attacked by another piece
+        if(pawnIsMenacingTile(r, c, color))
+            return false;
+
+        //On the single tile I cannot resolve more than an attack
+        if(enemyArmy.get(r).get(c).size() == 1)
+            return !(attackFromPieceCanBeBlocked(enemyArmy.get(r).get(c).get(0), r, c));
+
+        return true;
+    }
+
+    private static boolean tileIsNotOccupiedByAlly(int r, int c, Color color) {
+        if(board.getPiece(r,c) == null)
+            return true;
+        return  board.getPiece(r,c).color != color;
+    }
+
+    private static boolean attackFromPieceCanBeBlocked(Piece piece, int r, int c) {
+        if(isPieceMenaced(piece))
+            return true;
+
+        if(piece.type == PieceType.KNIGHT)
+            return false;
+
+        //Note that we can never block an attack of this type with a pawn, unless it directly eat the attacking piece
+        ArrayList<ArrayList<ArrayList<Piece>>> army = (piece.color == Color.WHITE) ? blackPossibleMove : whitePossibleMove;
+        int aR = piece.getPosR(), aC = piece.getPosC();
+        if(aR != r) aR += signum(r - aR);
+        if(aC != c) aC += signum(c - aC);
+        while(aR != r || aC != c){
+            if(!army.get(aR).get(aC).isEmpty())
+                if(!(army.get(aR).get(aC).size() == 1 && (army.get(aR).get(aC).get(0).type == PieceType.KING)))
+                    return true;
+            if(aR != r) aR += signum(r - aR);
+            if(aC != c) aC += signum(c - aC);
+        }
+
+        return false;
+    }
+
     public static void  wouldEndInKingCheck(Move m){
         boolean res = false;
         processMove(m);
 
         Color movingColor = m.sourcePiece.color;
-        if(movingColor == Color.WHITE){
-            res = !blackPossibleMove.get(whiteKing.getPosR()).get(whiteKing.getPosC()).isEmpty();
-            res |= pawnIsMenacingTile(whiteKing.getPosR(), whiteKing.getPosC(), movingColor);
-        } else{
-            res = !whitePossibleMove.get(blackKing.getPosR()).get(blackKing.getPosC()).isEmpty();
-            res |= pawnIsMenacingTile(blackKing.getPosR(), blackKing.getPosC(), movingColor);
-        }
+        res = isPieceMenaced(movingColor == Color.WHITE ? whiteKing : blackKing);
 
         if(res){
             board.getTile(m.getTargetRow(), m.getTargetColumns()).setPiece(m.getTargetPiece());
@@ -78,35 +144,64 @@ public class BackgroundOverlay {
     }
 
     public static boolean isKingInCheck(Color kingColor){
+        return isPieceMenaced(kingColor == Color.WHITE ? whiteKing : blackKing);
+    }
+
+    public static boolean isPieceMenaced(Piece p){
+        return isTileMenaced(p.getPosR(), p.getPosC(), p.color);
+    }
+
+    public static boolean isTileMenaced(int r, int c, Color color){
         boolean res = false;
-        if(kingColor == Color.WHITE){
-            res = !blackPossibleMove.get(whiteKing.getPosR()).get(whiteKing.getPosC()).isEmpty();
-            res |= pawnIsMenacingTile(whiteKing.getPosR(), whiteKing.getPosC(), kingColor);
+        if(color == Color.WHITE){
+            res = !blackPossibleMove.get(r).get(c).isEmpty();
+            if(res)
+                if(blackPossibleMove.get(r).get(c).size() == 1 &&
+                        (blackPossibleMove.get(r).get(c).get(0).type == PieceType.PAWN ||
+                                blackPossibleMove.get(r).get(c).get(0).type == PieceType.KING))
+                    res = false;
+
+            res |= pawnIsMenacingTile(r, c, color);
         } else{
-            res = !whitePossibleMove.get(blackKing.getPosR()).get(blackKing.getPosC()).isEmpty();
-            res |= pawnIsMenacingTile(blackKing.getPosR(), blackKing.getPosC(), kingColor);
+            res = !whitePossibleMove.get(r).get(c).isEmpty();
+            if(whitePossibleMove.get(r).get(c).size() == 1 &&
+                    (whitePossibleMove.get(r).get(c).get(0).type == PieceType.PAWN ||
+                            whitePossibleMove.get(r).get(c).get(0).type == PieceType.KING))
+                res = false;
+            res |= pawnIsMenacingTile(r, c, color);
         }
         return res;
     }
 
     private static boolean pawnIsMenacingTile(int r, int c, Color movingColor) {
+        if(Board.IndexOutOfRange(r, c))
+            return false;
+
         if(movingColor == Color.WHITE){
-            if(board.getPiece(r-1, c+1) != null){
-                if(board.getPiece(r-1, c+1).type == PieceType.PAWN && board.getPiece(r-1, c+1).color == Color.BLACK)
-                    return true;
+            if(!Board.IndexOutOfRange(r-1, c+1)) {
+                if (board.getPiece(r - 1, c + 1) != null) {
+                    if (board.getPiece(r - 1, c + 1).type == PieceType.PAWN && board.getPiece(r - 1, c + 1).color == Color.BLACK)
+                        return true;
+                }
             }
-            if(board.getPiece(r-1, c-1) != null){
-                if(board.getPiece(r-1, c-1).type == PieceType.PAWN && board.getPiece(r-1, c-1).color == Color.BLACK)
-                    return true;
+            if(!Board.IndexOutOfRange(r-1, c-1)) {
+                if (board.getPiece(r - 1, c - 1) != null) {
+                    if (board.getPiece(r - 1, c - 1).type == PieceType.PAWN && board.getPiece(r - 1, c - 1).color == Color.BLACK)
+                        return true;
+                }
             }
         } else{
-            if(board.getPiece(r+1, c+1) != null){
-                if(board.getPiece(r+1, c+1).type == PieceType.PAWN && board.getPiece(r+1, c+1).color == Color.WHITE)
-                    return true;
+            if(!Board.IndexOutOfRange(r+1, c+1)) {
+                if (board.getPiece(r + 1, c + 1) != null) {
+                    if (board.getPiece(r + 1, c + 1).type == PieceType.PAWN && board.getPiece(r + 1, c + 1).color == Color.WHITE)
+                        return true;
+                }
             }
-            if(board.getPiece(r+1, c-1) != null) {
-                if (board.getPiece(r + 1, c - 1).type == PieceType.PAWN && board.getPiece(r + 1, c - 1).color == Color.WHITE)
-                    return true;
+            if(!Board.IndexOutOfRange(r+1, c-1)) {
+                if (board.getPiece(r + 1, c - 1) != null) {
+                    if (board.getPiece(r + 1, c - 1).type == PieceType.PAWN && board.getPiece(r + 1, c - 1).color == Color.WHITE)
+                        return true;
+                }
             }
         }
         return false;
@@ -181,6 +276,7 @@ public class BackgroundOverlay {
         }
 
         updateTrajectory(sourcePiece , m.getSourceRow(), m.getSourceColumns());
+
         return;
     }
 

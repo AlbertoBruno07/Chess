@@ -3,6 +3,7 @@ package core;
 import java.util.Objects;
 
 import static java.lang.Math.abs;
+import static java.lang.Math.signum;
 
 public abstract class Piece {
 
@@ -64,7 +65,9 @@ public abstract class Piece {
     public boolean equals(Object o) {
         if (!(o instanceof Piece piece)) return false;
         return getColor() == piece.getColor() &&
-                getType() == piece.getType();
+                getType() == piece.getType() &&
+                getPosR() == piece.getPosR() &&
+                getPosC() == piece.getPosC();
     }
 
     @Override
@@ -102,7 +105,8 @@ public abstract class Piece {
 
     protected boolean pawnMove(Move m, boolean fM) {
         if(m.getPiece(m.getTargetRow(), m.getTargetColumns()) != null)
-            return (abs(m.getSourceRow() - m.getTargetRow()) == 1 && abs(m.getSourceColumns() - m.getTargetColumns()) == 1);
+            return ((m.getSourceRow() - m.getTargetRow()) == (m.getSourcePiece().color == Color.WHITE ? 1 : -1)
+                    && abs(m.getSourceColumns() - m.getTargetColumns()) == 1);
 
         if(m.getTargetColumns() != m.getSourceColumns())
             return false;
@@ -121,4 +125,14 @@ public abstract class Piece {
     }
 
     public void pieceInsertion(Board board, int r, int c){}
+
+    private boolean rookIsInInitialPosition(Rook rook) {
+        if(rook.color == Color.WHITE && rook.getPosR() != 7)
+            return false;
+        if(rook.color == Color.BLACK && rook.getPosR() != 0)
+            return false;
+        if(rook.getPosC() != 0 && rook.getPosC() != 7)
+            return false;
+        return true;
+    }
 }

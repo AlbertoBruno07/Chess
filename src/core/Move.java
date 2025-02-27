@@ -92,4 +92,41 @@ public class Move {
 
         return false;
     }
+
+    public boolean isACastlingMove() {
+        Piece king = sourcePiece, rook = targetPiece;
+        if(king == null || rook == null)
+            return false;
+
+        if(king.type == PieceType.ROOK && rook.type == PieceType.KING){
+            Piece a = king;
+            king = rook;
+            rook = a;
+        }
+
+        if(king.type != PieceType.KING || rook.type != PieceType.ROOK)
+            return false;
+
+        if(checkObstacles())
+            return false;
+
+        if(!((King)king).firstMove)
+            return false;
+
+        if(rook.color != king.color)
+            return false;
+
+        if(!(((Rook)rook).firstMove))
+            return false;
+
+        int ac = king.getPosC();
+        int s = rook.getPosC()-king.getPosC() < 0 ? -1 : 1;
+        while(ac != ( (king.getPosC() + rook.getPosC()) / 2 ) + (king.getPosC() < rook.getPosC() ? 2 : -2 )){
+            if(BackgroundOverlay.isTileMenaced(king.getPosR(), ac, king.getColor()))
+                return false;
+            ac += s;
+        }
+
+        return true;
+    }
 }

@@ -3,8 +3,13 @@ package gui;
 import core.*;
 import core.Color;
 
+import javax.imageio.ImageIO;
 import javax.swing.*;
 import java.awt.*;
+import java.awt.geom.AffineTransform;
+import java.awt.image.AffineTransformOp;
+import java.awt.image.BufferedImage;
+import java.io.IOException;
 import java.net.URL;
 
 public class BoardPanel extends JPanel {
@@ -76,6 +81,7 @@ public class BoardPanel extends JPanel {
 
     public void clearPiece(int r, int c){
         tiles[r][c].removeAll();
+        tiles[r][c].updateUI();
     }
 
     public void drawPiece(int r, int c, PieceType pT, Color color){
@@ -114,6 +120,8 @@ public class BoardPanel extends JPanel {
             processMove(sourceRow, sourceColumn, r, c);
             unhighlightSourceTile(sourceRow, sourceColumn);
             kingIsInCheck(game.getTurn());
+            if(BackgroundOverlay.checkMate(game.getTurn()))
+                drawCheckMate(game.getTurn());
             Color inverseTurn = game.turn == Color.WHITE ? Color.BLACK : Color.WHITE;
             tiles[BackgroundOverlay.getKingR(inverseTurn)][BackgroundOverlay.getKingC(inverseTurn)]
                     .setBackground(determineTileColor(BackgroundOverlay.getKingR(inverseTurn),
@@ -123,12 +131,39 @@ public class BoardPanel extends JPanel {
         }
     }
 
+    private void drawCheckMate(Color turn) {
+        int r = BackgroundOverlay.getKingR(turn), c = BackgroundOverlay.getKingC(turn);
+        clearPiece(r, c);
+
+        String iconName = "icons/" + (turn == Color.WHITE ? "W" : "B") + "K" + ".png";
+        URL url = getClass().getClassLoader().getResource(iconName);
+        try {
+            BufferedImage img = ImageIO.read(url);
+            BufferedImage rImg = new BufferedImage(img.getHeight(), img.getWidth(), img.getType());
+            Graphics2D g2d = rImg.createGraphics();
+            g2d.rotate(Math.PI /2, img.getHeight()/2.0f, img.getWidth()/2.0f);
+            g2d.drawImage(img, null, 0, 0);
+            g2d.dispose();
+            JLabel label = new JLabel(new ImageIcon(rImg.getScaledInstance(TILE_DIMENSION, TILE_DIMENSION, Image.SCALE_SMOOTH)));
+            tiles[r][c].removeAll();
+            tiles[r][c].add(label);
+            tiles[r][c].updateUI();
+        } catch (IOException IOe){System.out.println("Cannot read icon!!");}
+    }
+
     private void processMove(int sourceRow, int sourceColumn, int targetRow, int targetColumn) {
-        if(game.processMove(sourceRow, sourceColumn, targetRow, targetColumn)){
+        if(game.processMove(sourceRow, sourceColumn, targetRow, targetColumn, this)){
             Piece tP = game.getBoard().getPiece(targetRow, targetColumn);
             clearPiece(sourceRow, sourceColumn);
             drawPiece(targetRow, targetColumn, tP.getType(), tP.getColor());
         }
+    }
+
+    public void processCastling(int r, int kSC, int kTC, int rSC, int rTC){
+        clearPiece(r, kSC);
+        clearPiece(r, rSC);
+        drawPiece(r, kTC, PieceType.KING, (r == 7 ? Color.WHITE : Color.BLACK));
+        drawPiece(r, rTC, PieceType.ROOK, (r == 7 ? Color.WHITE : Color.BLACK));
     }
 
     public void kingIsInCheck(Color c){

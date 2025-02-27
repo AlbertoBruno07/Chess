@@ -1,5 +1,7 @@
 package core;
 
+import gui.BoardPanel;
+
 import java.util.ArrayList;
 
 public class Game {
@@ -100,8 +102,20 @@ public class Game {
     }
 
     public boolean processMove(int sR, int sC,
-                               int tR, int tC){
+                               int tR, int tC,
+                               BoardPanel bp){
         Move move = new Move(sR, sC, tR, tC, board);
+
+        //Managing it as a completely separated case
+        if(move.isACastlingMove()){
+            if(turn == Color.BLACK)
+                BackgroundOverlay.getBlackKing().updateFM();
+            else
+                BackgroundOverlay.getWhiteKing().updateFM();
+            manageCastling(move, bp);
+            switchTurn();
+            return false;
+        }
 
         try{
             board.getPiece(sR, sC).validateMove(move);
@@ -123,6 +137,29 @@ public class Game {
             System.out.println(ime);
             return false;
         }
+    }
+
+    public void manageCastling(Move m, BoardPanel bp){
+        Piece rook = m.getSourcePiece(), king = m.getTargetPiece();
+        if(rook.type == PieceType.KING){
+            Piece a = rook;
+            rook = king;
+            king = a;
+        }
+
+        int expectedKingColumn = ( (king.getPosC() + rook.getPosC()) / 2 ) + (king.getPosC() < rook.getPosC() ? 1 : -1 );
+        int expectedRookColumn = expectedKingColumn + (king.getPosC() < rook.getPosC() ? -1 : 1 );
+
+        bp.processCastling(rook.getPosR(), king.getPosC(), expectedKingColumn, rook.getPosC(), expectedRookColumn);
+
+        Move mR = new Move(rook.getPosR(), rook.getPosC(), rook.getPosR(), expectedRookColumn, board);
+        Move mK = new Move(king.getPosR(), king.getPosC(), king.getPosR(), expectedKingColumn, board);
+
+        board.getTile(m.getSourceRow(), expectedKingColumn).setPiece(king);
+        board.getTile(m.getSourceRow(), expectedRookColumn).setPiece(rook);
+
+        BackgroundOverlay.processMove(mR);
+        BackgroundOverlay.processMove(mK);
     }
 
     private void switchTurn() {
