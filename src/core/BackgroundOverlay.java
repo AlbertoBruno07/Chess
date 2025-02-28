@@ -280,6 +280,13 @@ public class BackgroundOverlay {
         return;
     }
 
+    public static void processPawnPromotion(Move m, Piece newPiece){
+        processMove(m);
+        pieceRemotion(m.getSourcePiece(), m.getTargetRow(), m.getTargetColumns());
+        pieceInsertion(newPiece, m.getTargetRow(), m.getTargetColumns());
+        return;
+    }
+
     //To be executed only after a processMove(m)
     public static void unprocessMove(Move m){
         Piece sourcePiece = m.getSourcePiece();

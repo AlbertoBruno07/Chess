@@ -2,6 +2,7 @@ package core;
 
 import gui.BoardPanel;
 
+import javax.swing.*;
 import java.util.ArrayList;
 
 public class Game {
@@ -114,7 +115,13 @@ public class Game {
                 BackgroundOverlay.getWhiteKing().updateFM();
             manageCastling(move, bp);
             switchTurn();
-            return false;
+            return false; //Do not wanna render normally, let BoardPanel believe that the move is invalid
+        }
+
+        if(move.isPawnPromotionMove()){
+            managePawnPromotion(move, bp);
+            switchTurn();
+            return true; //Wanna render normally
         }
 
         try{
@@ -139,6 +146,28 @@ public class Game {
         }
     }
 
+    private void managePawnPromotion(Move move, BoardPanel bp) {
+        String promotedPieceType = (String) JOptionPane.showInputDialog(null,
+                    "Select promoted piece", "Pawn Promotion", JOptionPane.QUESTION_MESSAGE, null,
+                    new String[]{"Bishop", "Rook", "Knight", "Queen"}, "Bishop");
+        if(promotedPieceType == null)
+            promotedPieceType = "Pawn";
+        Piece nP =
+        switch (promotedPieceType){
+            case "Bishop" -> new Bishop(move.getSourcePiece().getColor());
+            case "Rook" -> new Rook(move.getSourcePiece().getColor());
+            case "Knight" -> new Knight(move.getSourcePiece().getColor());
+            case "Queen" -> new Queen(move.getSourcePiece().getColor());
+            case "Pawn" -> move.sourcePiece;
+            default -> throw new IllegalStateException("Unexpected value: " + promotedPieceType);
+        };
+        board.getTile(move.getTargetRow(), move.getTargetColumns()).setPiece(nP);
+        board.getTile(move.getSourceRow(), move.getSourceColumns()).setPiece(null);
+        removePieceFromArmy(move.sourcePiece);
+        addPieceToArmy(nP);
+        BackgroundOverlay.processPawnPromotion(move, nP);
+    }
+
     public void manageCastling(Move m, BoardPanel bp){
         Piece rook = m.getSourcePiece(), king = m.getTargetPiece();
         if(rook.type == PieceType.KING){
@@ -157,6 +186,8 @@ public class Game {
 
         board.getTile(m.getSourceRow(), expectedKingColumn).setPiece(king);
         board.getTile(m.getSourceRow(), expectedRookColumn).setPiece(rook);
+        board.getTile(m.getSourceRow(), m.getSourceColumns()).setPiece(null);
+        board.getTile(m.getTargetRow(), m.getTargetColumns()).setPiece(null);
 
         BackgroundOverlay.processMove(mR);
         BackgroundOverlay.processMove(mK);

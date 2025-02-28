@@ -129,4 +129,20 @@ public class Move {
 
         return true;
     }
+
+    public boolean isPawnPromotionMove() {
+        if(sourcePiece.type != PieceType.PAWN)
+            return false;
+
+        try {
+            sourcePiece.validateMove(this);
+        } catch(Exception e){
+            return false;
+        }
+
+        if(targetRow != (sourcePiece.getColor() == Color.WHITE ? 0 : 7))
+            return false;
+
+        return true;
+    }
 }
