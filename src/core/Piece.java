@@ -1,5 +1,7 @@
 package core;
 
+import gui.BoardPanel;
+
 import java.util.Objects;
 
 import static java.lang.Math.abs;
@@ -112,8 +114,10 @@ public abstract class Piece {
             return false;
 
         if(fM)
-            if(tryForwardMove(m, 2))
+            if(tryForwardMove(m, 2)) {
+                Game.setPossibleEnPassant(this);
                 return true;
+            }
 
         return tryForwardMove(m, 1);
 

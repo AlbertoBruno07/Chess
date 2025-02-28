@@ -10,8 +10,18 @@ public class Game {
     public Color turn;
     private ArrayList<Piece> blackArmy, whiteArmy;
     private Board board;
-
+    private static Piece possibleEnPassant;
+    private static int timeFromEnPassantUpdate;
     private BackgroundOverlay backgroundOverlay;
+
+    public static Piece getPossibleEnPassant() {
+        return possibleEnPassant;
+    }
+
+    public static void setPossibleEnPassant(Piece possibleEnPassant) {
+        Game.possibleEnPassant = possibleEnPassant;
+        if(possibleEnPassant != null) timeFromEnPassantUpdate = 0;
+    }
 
     public BackgroundOverlay getBackgroundOverlay() {
         return backgroundOverlay;
@@ -115,13 +125,19 @@ public class Game {
                 BackgroundOverlay.getWhiteKing().updateFM();
             manageCastling(move, bp);
             switchTurn();
-            return false; //Do not wanna render normally, let BoardPanel believe that the move is invalid
+            return false; //Do not wanna render normally, let BoardPanel believe the move is invalid
         }
 
         if(move.isPawnPromotionMove()){
             managePawnPromotion(move, bp);
             switchTurn();
             return true; //Wanna render normally
+        }
+
+        if(move.isEnPassant()){
+            manageEnPassant(move, bp);
+            switchTurn();
+            return false; //Do not wanna render normally, let BoardPanel believe the move is invalid
         }
 
         try{
@@ -136,14 +152,29 @@ public class Game {
             board.getTile(sR, sC).setPiece(null);
             BackgroundOverlay.wouldEndInKingCheck(move);
             switchTurn();
+            if(timeFromEnPassantUpdate < 2)
+                timeFromEnPassantUpdate++;
+            if(timeFromEnPassantUpdate > 1)
+                setPossibleEnPassant(null);
             BackgroundOverlay.processMove(move);
             if(board.getPiece(tR, tC).type == PieceType.PAWN)
-                ((Pawn)board.getPiece(tR, tC)).updateEp();
+                ((Pawn)board.getPiece(tR, tC)).updateFM();
             return true;
         } catch(InvalidMoveException ime){
             System.out.println(ime);
             return false;
         }
+    }
+
+    private void manageEnPassant(Move m, BoardPanel bp) {
+        board.getTile(m.getTargetRow(), m.getTargetColumns()).setPiece(m.getSourcePiece());
+        board.getTile(m.getSourceRow(), m.getSourceColumns()).setPiece(null);
+        //At this point we are sure of these coordinates
+        removePieceFromArmy(board.getPiece(m.getSourceRow(), m.getTargetColumns()));
+        Piece removedPiece = board.getPiece(m.getSourceRow(), m.getTargetColumns());
+        board.getTile(m.getSourceRow(), m.getTargetColumns()).setPiece(null);
+        bp.processEnPassant(m);
+        BackgroundOverlay.processEnPassant(m, removedPiece);
     }
 
     private void managePawnPromotion(Move move, BoardPanel bp) {

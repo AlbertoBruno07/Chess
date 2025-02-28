@@ -148,7 +148,33 @@ public class BackgroundOverlay {
     }
 
     public static boolean isPieceMenaced(Piece p){
+        if(p.type == PieceType.PAWN)
+            if(checkIfPawnIsMenacedByEnPassant(p))
+                return true;
+
         return isTileMenaced(p.getPosR(), p.getPosC(), p.color);
+    }
+
+    private static boolean checkIfPawnIsMenacedByEnPassant(Piece p) {
+        if(p.type != PieceType.PAWN)
+            return false;
+
+        if(p != Game.getPossibleEnPassant())
+            return false;
+
+        int r = p.getPosR(), c = p.getPosC();
+        
+        if(r == 0 || r == 7)
+            return false;
+        
+        if(!Board.IndexOutOfRange(r, c+1))
+            if((new Move(r, c+1, r+(p.color == Color.BLACK ? -1 : 1), c, board)).isEnPassant())
+                return true;
+        if(!Board.IndexOutOfRange(r, c-1))
+            if((new Move(r, c-1, r+(p.color == Color.BLACK ? -1 : 1), c, board)).isEnPassant())
+                return true;
+
+        return false;
     }
 
     public static boolean isTileMenaced(int r, int c, Color color){
@@ -322,5 +348,12 @@ public class BackgroundOverlay {
                 pieceInsertion(p, p.getPosR(), p.getPosC());
             }
         }
+    }
+
+    public static void processEnPassant(Move m, Piece removedPiece) {
+        pieceRemotion(m.getSourcePiece(), m.getSourceRow(), m.getSourceColumns());
+        pieceRemotion(removedPiece, m.getSourceRow(), m.getTargetColumns());
+        pieceInsertion(m.getSourcePiece(), m.getTargetRow(), m.getTargetColumns());
+        return;
     }
 }

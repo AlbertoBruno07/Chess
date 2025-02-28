@@ -170,4 +170,10 @@ public class BoardPanel extends JPanel {
         if(BackgroundOverlay.isKingInCheck(c))
             tiles[BackgroundOverlay.getKingR(c)][BackgroundOverlay.getKingC(c)].setBackground(java.awt.Color.RED);
     }
+
+    public void processEnPassant(Move m) {
+        clearPiece(m.getSourceRow(), m.getSourceColumns());
+        clearPiece(m.getSourceRow(), m.getTargetColumns());
+        drawPiece(m.getTargetRow(), m.getTargetColumns(), m.getSourcePiece().getType(), m.getSourcePiece().getColor());
+    }
 }

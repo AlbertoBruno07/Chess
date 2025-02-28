@@ -23,19 +23,22 @@ public class Pawn extends Piece{
         return firstMove;
     }
 
-    public void updateEp() {
+    public void updateFM() {
         firstMove = false;
     }
 
     @Override
     public void pieceInsertion(Board board, int r, int c) {
         insertPiece(this, r, c);
+
         if(color == Color.WHITE)
-            if(!Board.IndexOutOfRange(r-1, c))
-                insertPiece(this, r-1, c);
+            if (!Board.IndexOutOfRange(r - 1, c))
+                insertPiece(this, r - 1, c);
+
         if(color == Color.BLACK)
-            if(!Board.IndexOutOfRange(r+1, c))
-                insertPiece(this, r+1, c);
+            if (!Board.IndexOutOfRange(r + 1, c))
+                insertPiece(this, r + 1, c);
+
         if(getPosR() == ((color == Color.WHITE) ? 6 : 1))
             insertPiece(this, r + ((color == Color.WHITE) ? -2 : 2), c);
     }

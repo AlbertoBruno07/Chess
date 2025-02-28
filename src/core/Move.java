@@ -145,4 +145,29 @@ public class Move {
 
         return true;
     }
+
+    public boolean isEnPassant(){
+        if(sourcePiece == null)
+            return false;
+        
+        if(sourcePiece.type != PieceType.PAWN)
+            return false;
+
+        if(targetPiece != null)
+            return false;
+
+        if(!Board.IndexOutOfRange(getSourceRow(), getSourceColumns()+1)){
+            if(getPiece(getSourceRow(), getSourceColumns()+1) == Game.getPossibleEnPassant() && Game.getPossibleEnPassant() != null){
+                return (getTargetRow() == (getSourceRow() + (getSourcePiece().color == Color.WHITE ? -1 : 1))) &&
+                        (getSourceColumns()+1 == getTargetColumns()) && getPiece(getSourceRow(), getSourceColumns()+1).getColor() != sourcePiece.getColor();
+            }
+        }
+        if(!Board.IndexOutOfRange(getSourceRow(), getSourceColumns()-1)){
+            if(getPiece(getSourceRow(), getSourceColumns()-1) == Game.getPossibleEnPassant()  && Game.getPossibleEnPassant() != null){
+                return (getTargetRow() == (getSourceRow() + (getSourcePiece().color == Color.WHITE ? -1 : 1))) &&
+                        (getSourceColumns()-1 == getTargetColumns()) && getPiece(getSourceRow(), getSourceColumns()-1).getColor() != sourcePiece.getColor();
+            }
+        }
+        return false;
+    }
 }
