@@ -136,13 +136,13 @@ public class Game {
 
         if(move.isEnPassant()){
             manageEnPassant(move, bp);
-            switchTurn();
             return false; //Do not wanna render normally, let BoardPanel believe the move is invalid
         }
 
         try{
             board.getPiece(sR, sC).validateMove(move);
             //move.wouldEndInKingCheck(backgroundOverlay);
+            BackgroundOverlay.wouldEndInKingCheck(move);
             if(board.getPiece(tR, tC) != null) {
                 if (board.getPiece(sR, sC).color == board.getPiece(tR, tC).color)
                     return false;
@@ -150,7 +150,6 @@ public class Game {
             }
             board.getTile(tR, tC).setPiece(board.getPiece(sR, sC));
             board.getTile(sR, sC).setPiece(null);
-            BackgroundOverlay.wouldEndInKingCheck(move);
             switchTurn();
             if(timeFromEnPassantUpdate < 2)
                 timeFromEnPassantUpdate++;
@@ -167,14 +166,21 @@ public class Game {
     }
 
     private void manageEnPassant(Move m, BoardPanel bp) {
+        try{
+            BackgroundOverlay.wouldEndInKingCheck(m);
+        } catch (Exception e){
+            System.out.println(e);
+            return;
+        }
+        //At this point we are sure of these coordinates
         board.getTile(m.getTargetRow(), m.getTargetColumns()).setPiece(m.getSourcePiece());
         board.getTile(m.getSourceRow(), m.getSourceColumns()).setPiece(null);
-        //At this point we are sure of these coordinates
         removePieceFromArmy(board.getPiece(m.getSourceRow(), m.getTargetColumns()));
         Piece removedPiece = board.getPiece(m.getSourceRow(), m.getTargetColumns());
         board.getTile(m.getSourceRow(), m.getTargetColumns()).setPiece(null);
         bp.processEnPassant(m);
         BackgroundOverlay.processEnPassant(m, removedPiece);
+        switchTurn();
     }
 
     private void managePawnPromotion(Move move, BoardPanel bp) {
