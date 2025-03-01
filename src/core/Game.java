@@ -1,6 +1,6 @@
 package core;
 
-import gui.BoardPanel;
+import gui.GameFrame.BoardPanel;
 
 import javax.swing.*;
 import java.util.ArrayList;

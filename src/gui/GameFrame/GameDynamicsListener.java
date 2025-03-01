@@ -1,6 +1,4 @@
-package gui;
-
-import core.Board;
+package gui.GameFrame;
 
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;

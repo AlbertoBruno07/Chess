@@ -1,9 +1,9 @@
-package gui;
+package gui.StartDialBox;
 
 public class GuiLauncher {
 
     public static void main(String[] args){
-        GameFrame gf = new GameFrame();
+        StartDialBox sDB = new StartDialBox();
     }
 
 }

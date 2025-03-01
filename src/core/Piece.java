@@ -1,9 +1,5 @@
 package core;
 
-import gui.BoardPanel;
-
-import java.util.Objects;
-
 import static java.lang.Math.abs;
 import static java.lang.Math.signum;
 

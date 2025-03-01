@@ -1,13 +1,12 @@
-package gui;
+package gui.GameFrame;
 
+import Settings.Settings;
 import core.*;
 import core.Color;
 
 import javax.imageio.ImageIO;
 import javax.swing.*;
 import java.awt.*;
-import java.awt.geom.AffineTransform;
-import java.awt.image.AffineTransformOp;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.net.URL;
@@ -84,8 +83,12 @@ public class BoardPanel extends JPanel {
         tiles[r][c].updateUI();
     }
 
+    private String makeIconName(PieceType pT, Color c){
+        return "icons/" + Settings.getSelectedIconPackage() + "/" + (c == Color.WHITE ? "W" : "B") + letterForPiece(pT) + ".png";
+    }
+
     public void drawPiece(int r, int c, PieceType pT, Color color){
-        String iconName = "icons/" + (color == Color.WHITE ? "W" : "B") + letterForPiece(pT) + ".png";
+        String iconName = makeIconName(pT, color);
         URL url = getClass().getClassLoader().getResource(iconName);
         Image image = new ImageIcon(url).getImage();
         image = image.getScaledInstance(TILE_DIMENSION, TILE_DIMENSION,
@@ -135,7 +138,7 @@ public class BoardPanel extends JPanel {
         int r = BackgroundOverlay.getKingR(turn), c = BackgroundOverlay.getKingC(turn);
         clearPiece(r, c);
 
-        String iconName = "icons/" + (turn == Color.WHITE ? "W" : "B") + "K" + ".png";
+        String iconName = makeIconName(PieceType.KING, turn);
         URL url = getClass().getClassLoader().getResource(iconName);
         try {
             BufferedImage img = ImageIO.read(url);

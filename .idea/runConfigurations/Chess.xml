@@ -1,6 +1,6 @@
 <component name="ProjectRunConfigurationManager">
   <configuration default="false" name="Chess" type="Application" factoryName="Application">
-    <option name="MAIN_CLASS_NAME" value="gui.GuiLauncher" />
+    <option name="MAIN_CLASS_NAME" value="gui.GameFrame.GuiLauncher" />
     <module name="Chess" />
     <method v="2">
       <option name="Make" enabled="true" />
