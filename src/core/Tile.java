@@ -25,4 +25,12 @@ public class Tile {
     public Color getColor() {
         return color;
     }
+
+    public int getRow() {
+        return row;
+    }
+
+    public int getColumn() {
+        return column;
+    }
 }

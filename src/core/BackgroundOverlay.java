@@ -82,7 +82,10 @@ public class BackgroundOverlay {
                             board.getTile(r+i, c+j).setPiece(m.getTargetPiece());
                             board.getTile(r, c).setPiece(king);
                             return false;
-                        } catch (Exception e) {}
+                        } catch (Exception e) {
+                            board.getTile(r+i, c+j).setPiece(m.getTargetPiece());
+                            board.getTile(r, c).setPiece(king);
+                        }
                     }
                 }
 
@@ -177,22 +180,21 @@ public class BackgroundOverlay {
         return false;
     }
 
+    //If the king is menacing a tile we should check it can really go there, but for what is used it's ok
     public static boolean isTileMenaced(int r, int c, Color color){
         boolean res = false;
         if(color == Color.WHITE){
             res = !blackPossibleMove.get(r).get(c).isEmpty();
             if(res)
                 if(blackPossibleMove.get(r).get(c).size() == 1 &&
-                        (blackPossibleMove.get(r).get(c).get(0).type == PieceType.PAWN ||
-                                blackPossibleMove.get(r).get(c).get(0).type == PieceType.KING))
+                        (blackPossibleMove.get(r).get(c).get(0).type == PieceType.PAWN))
                     res = false;
 
             res |= pawnIsMenacingTile(r, c, color);
         } else{
             res = !whitePossibleMove.get(r).get(c).isEmpty();
             if(whitePossibleMove.get(r).get(c).size() == 1 &&
-                    (whitePossibleMove.get(r).get(c).get(0).type == PieceType.PAWN ||
-                            whitePossibleMove.get(r).get(c).get(0).type == PieceType.KING))
+                    (whitePossibleMove.get(r).get(c).get(0).type == PieceType.PAWN))
                 res = false;
             res |= pawnIsMenacingTile(r, c, color);
         }
@@ -324,7 +326,7 @@ public class BackgroundOverlay {
         if(targetPiece != null){
             pieceInsertion(targetPiece, m.getTargetRow(), m.getTargetColumns());
         } else{
-            updateTrajectory(targetPiece, m.getTargetRow(), m.getTargetColumns());
+            updateTrajectory(sourcePiece, m.getTargetRow(), m.getTargetColumns());
         }
         updateTrajectory(sourcePiece, m.getSourceRow(), m.getSourceColumns());
 
@@ -333,19 +335,25 @@ public class BackgroundOverlay {
 
     private static void updateTrajectory(Piece ignorePiece, int r, int c) {
         ArrayList<Piece> arr = whitePossibleMove.get(r).get(c);
+        int v = 0;
         for(int i = 0; i < arr.size(); i++) {
-            Piece p = arr.get(0); //Getting pieces out and in we must always look at first position
+            Piece p = arr.get(v); //Getting pieces out and in we must always look at first position
             if(p != ignorePiece) {
                 pieceRemotion(p, p.getPosR(), p.getPosC());
                 pieceInsertion(p, p.getPosR(), p.getPosC());
+            } else{
+                v++; //But if we skip a piece, we need to look at the next position
             }
         }
         arr = blackPossibleMove.get(r).get(c);
+        v = 0;
         for(int i = 0; i < arr.size(); i++) {
-            Piece p = arr.get(0); //Getting pieces out and in we must always look at first position
+            Piece p = arr.get(v); //Getting pieces out and in we must always look at first position
             if(p != ignorePiece) {
                 pieceRemotion(p, p.getPosR(), p.getPosC());
                 pieceInsertion(p, p.getPosR(), p.getPosC());
+            } else{
+                v++;//But if we skip a piece, we need to look at the next position
             }
         }
     }
@@ -355,5 +363,48 @@ public class BackgroundOverlay {
         pieceRemotion(removedPiece, m.getSourceRow(), m.getTargetColumns());
         pieceInsertion(m.getSourcePiece(), m.getTargetRow(), m.getTargetColumns());
         return;
+    }
+
+    public static ArrayList<Tile> getPossibleMoves(Piece p) { //Using tiles as markers; the color is not important
+        ArrayList<Tile> possibleTiles = new ArrayList<Tile>();
+        ArrayList<ArrayList<ArrayList<Piece>>> army = p.getColor() == Color.WHITE ? whitePossibleMove : blackPossibleMove;
+
+        for(int i = 0; i < Board.getRows(); i++)
+            for(int j = 0; j < Board.getColumns(); j++) {
+                if(army.get(i).get(j).contains(p)) {
+                    if (board.getPiece(i, j) != null) {
+                        if (board.getPiece(i, j).getColor() != p.getColor())
+                            possibleTiles.add(new Tile(i, j, null));
+                    } else{
+                        possibleTiles.add(new Tile(i, j, null));
+                    }
+                }
+            }
+
+        //EnPassant
+        if(p.type == PieceType.PAWN){
+            if(p.getPosR() != 0 && p.getPosR() != 7) { //Could be expanded, but not really usefull
+                if(!Board.IndexOutOfRange(p.getPosR(), p.getPosC()+1))
+                    if((new Move(p.getPosR(), p.getPosC(), p.getPosR() + (p.getColor() == Color.BLACK ? 1 : -1), p.getPosC()+1, board)).isEnPassant())
+                        possibleTiles.add(new Tile(p.getPosR() + (p.getColor() == Color.BLACK ? 1 : -1), p.getPosC()+1, null));
+                if(!Board.IndexOutOfRange(p.getPosR(), p.getPosC()-1))
+                    if((new Move(p.getPosR(), p.getPosC(), p.getPosR() + (p.getColor() == Color.BLACK ? 1 : -1), p.getPosC()-1, board)).isEnPassant())
+                        possibleTiles.add(new Tile(p.getPosR() + (p.getColor() == Color.BLACK ? 1 : -1), p.getPosC()-1, null));
+            }
+        }
+
+        //Castling
+        if(p.type == PieceType.KING){
+            if((new Move(p.getPosR(), p.getPosC(), p.getPosR(), 0, board)).isACastlingMove())
+                possibleTiles.add(new Tile(p.getPosR(), 0, null));
+            if((new Move(p.getPosR(), p.getPosC(), p.getPosR(), 7, board)).isACastlingMove())
+                possibleTiles.add(new Tile(p.getPosR(), 7, null));
+        }
+        if(p.type == PieceType.ROOK){
+            if((new Move(p.getPosR(), p.getPosC(), p.getPosR(), 4, board)).isACastlingMove())
+                possibleTiles.add(new Tile(p.getPosR(), 4, null));
+        }
+
+        return possibleTiles;
     }
 }

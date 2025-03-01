@@ -19,6 +19,14 @@ public class GameDynamicsListener implements MouseListener, MouseMotionListener 
         this.bP = bP;
     }
 
+    private int getTileC(int mouseX){
+        return mouseX/BoardPanel.TILE_DIMENSION;
+    }
+
+    private int getTileR(int mouseY){
+        return mouseY/BoardPanel.TILE_DIMENSION;
+    }
+
     @Override
     public void mouseClicked(MouseEvent e) {
 
@@ -26,8 +34,7 @@ public class GameDynamicsListener implements MouseListener, MouseMotionListener 
 
     @Override
     public void mousePressed(MouseEvent e) {
-        int x = e.getX(), y = e.getY();
-        int c = x/BoardPanel.TILE_DIMENSION, r = y/BoardPanel.TILE_DIMENSION;
+        int c = getTileC(e.getX()), r = getTileR(e.getY());
         bP.onMove(r, c);
     }
 
@@ -43,7 +50,7 @@ public class GameDynamicsListener implements MouseListener, MouseMotionListener 
 
     @Override
     public void mouseExited(MouseEvent e) {
-
+        bP.flushMovePreview();
     }
 
     @Override
@@ -53,6 +60,7 @@ public class GameDynamicsListener implements MouseListener, MouseMotionListener 
 
     @Override
     public void mouseMoved(MouseEvent e) {
-
+        int c = getTileC(e.getX()), r = getTileR(e.getY());
+        bP.movePreview(r, c, false);
     }
 }

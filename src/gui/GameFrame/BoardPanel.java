@@ -7,9 +7,20 @@ import core.Color;
 import javax.imageio.ImageIO;
 import javax.swing.*;
 import java.awt.*;
+import java.awt.font.FontRenderContext;
+import java.awt.font.GlyphVector;
+import java.awt.geom.AffineTransform;
 import java.awt.image.BufferedImage;
+import java.awt.image.BufferedImageOp;
+import java.awt.image.ImageObserver;
+import java.awt.image.RenderedImage;
+import java.awt.image.renderable.RenderableImage;
 import java.io.IOException;
 import java.net.URL;
+import java.text.AttributedCharacterIterator;
+import java.util.ArrayList;
+import java.util.Map;
+import java.util.concurrent.TimeoutException;
 
 public class BoardPanel extends JPanel {
     static final int TILE_DIMENSION = 100;
@@ -20,6 +31,25 @@ public class BoardPanel extends JPanel {
     private GameDynamicsListener listener;
     private int sourceRow, sourceColumn;
     private boolean moveIsOnGoing;
+    private ArrayList<Tile> possibleMoves;
+
+    //Using a class to make easier the detection fo the right component
+    private class circle extends JPanel{
+        java.awt.Color color;
+        public circle(java.awt.Color color) {
+            super.setOpaque(false);
+            super.setSize(TILE_DIMENSION, TILE_DIMENSION);
+            this.color = color;
+        }
+
+        @Override
+        protected void paintComponent(Graphics g) {
+            super.paintComponent(g);
+
+            g.setColor(color);
+            g.fillOval(TILE_DIMENSION/4, TILE_DIMENSION/4, TILE_DIMENSION-50, TILE_DIMENSION-50);
+        }
+    }
 
 
     public BoardPanel(Game game) {
@@ -113,6 +143,7 @@ public class BoardPanel extends JPanel {
     public void onMove(int r, int c){
         if(!moveIsOnGoing){
             if(game.isMoveSourceValid(r, c)){
+                movePreview(r, c, true);
                 moveIsOnGoing = true;
                 highlightSourceTile(r, c);
                 sourceRow = r;
@@ -120,6 +151,7 @@ public class BoardPanel extends JPanel {
             }
         } else{
             moveIsOnGoing = false;
+            flushMovePreview();
             processMove(sourceRow, sourceColumn, r, c);
             unhighlightSourceTile(sourceRow, sourceColumn);
             kingIsInCheck(game.getTurn());
@@ -178,5 +210,54 @@ public class BoardPanel extends JPanel {
         clearPiece(m.getSourceRow(), m.getSourceColumns());
         clearPiece(m.getSourceRow(), m.getTargetColumns());
         drawPiece(m.getTargetRow(), m.getTargetColumns(), m.getSourcePiece().getType(), m.getSourcePiece().getColor());
+    }
+
+    public void highlightMenacedPiece(int r, int c){
+        tiles[r][c].setBackground(java.awt.Color.GRAY);
+    }
+
+    public void movePreview(int r, int c, boolean isForMove) {
+        if(moveIsOnGoing)
+            return;
+
+        flushMovePreview();
+        if(game.getBoard().getPiece(r,c) == null)
+            return;
+
+        if(game.getBoard().getPiece(r,c).getColor() != game.getTurn())
+            return;
+
+        possibleMoves = BackgroundOverlay.getPossibleMoves(game.getBoard().getPiece(r,c));
+
+        for(var i : possibleMoves){
+            if(game.getBoard().getPiece(i.getRow(), i.getColumn()) != null)
+                highlightMenacedPiece(i.getRow(), i.getColumn());
+            else
+                tiles[i.getRow()][i.getColumn()].add(new circle(isForMove ? java.awt.Color.GREEN : java.awt.Color.GRAY));
+            tiles[i.getRow()][i.getColumn()].updateUI();
+        }
+    }
+
+    //To be called before update Board and possibleMoves
+    public void flushMovePreview() {
+        if(moveIsOnGoing)
+            return;
+
+        if(possibleMoves != null) {
+            for (var i : possibleMoves){
+                if(game.getBoard().getPiece(i.getRow(), i.getColumn()) != null) {
+                    unhighlightSourceTile(i.getRow(), i.getColumn());
+                    tiles[i.getRow()][i.getColumn()].updateUI();
+                    continue;
+                }
+                for(var c : tiles[i.getRow()][i.getColumn()].getComponents())
+                    if(c instanceof circle) {
+                        tiles[i.getRow()][i.getColumn()].remove(c);
+                        break;
+                    }
+                tiles[i.getRow()][i.getColumn()].updateUI();
+            }
+            possibleMoves = null;
+        }
     }
 }
