@@ -83,15 +83,50 @@ public class BackgroundOverlay {
                     }
                 }
 
-        //Means that we cannot eat the pawn but we are also attacked by another piece
-        if(pawnIsMenacingTile(r, c, color))
-            return false;
+        //Check pawn
+        if(pawnIsMenacingTile(r, c, color) && enemyArmy.get(r).get(c).isEmpty())
+            return !(attackFromPieceCanBeBlocked(getPawnMenacingTile(r, c, color), r, c));
 
         //On the single tile I cannot resolve more than an attack
-        if(enemyArmy.get(r).get(c).size() == 1)
+        if(enemyArmy.get(r).get(c).size() == 1 && !pawnIsMenacingTile(r, c, color))
             return !(attackFromPieceCanBeBlocked(enemyArmy.get(r).get(c).get(0), r, c));
 
         return true;
+    }
+
+    private static Piece getPawnMenacingTile(int r, int c, Color color) {
+        if(Board.IndexOutOfRange(r, c))
+            return null;
+
+        if(color == Color.WHITE){
+            if(!Board.IndexOutOfRange(r-1, c+1)) {
+                if (board.getPiece(r - 1, c + 1) != null) {
+                    if (board.getPiece(r - 1, c + 1).type == PieceType.PAWN && board.getPiece(r - 1, c + 1).color == Color.BLACK)
+                        return board.getPiece(r - 1, c + 1);
+                }
+            }
+            if(!Board.IndexOutOfRange(r-1, c-1)) {
+                if (board.getPiece(r - 1, c - 1) != null) {
+                    if (board.getPiece(r - 1, c - 1).type == PieceType.PAWN && board.getPiece(r - 1, c - 1).color == Color.BLACK)
+                        return board.getPiece(r - 1, c - 1);
+                }
+            }
+        } else{
+            if(!Board.IndexOutOfRange(r+1, c+1)) {
+                if (board.getPiece(r + 1, c + 1) != null) {
+                    if (board.getPiece(r + 1, c + 1).type == PieceType.PAWN && board.getPiece(r + 1, c + 1).color == Color.WHITE)
+                        return board.getPiece(r + 1, c + 1);
+                }
+            }
+            if(!Board.IndexOutOfRange(r+1, c-1)) {
+                if (board.getPiece(r + 1, c - 1) != null) {
+                    if (board.getPiece(r + 1, c - 1).type == PieceType.PAWN && board.getPiece(r + 1, c - 1).color == Color.WHITE)
+                        return board.getPiece(r + 1, c - 1);
+                }
+            }
+        }
+
+        return null;
     }
 
     private static boolean tileIsNotOccupiedByAlly(int r, int c, Color color) {
@@ -101,14 +136,31 @@ public class BackgroundOverlay {
     }
 
     private static boolean attackFromPieceCanBeBlocked(Piece piece, int r, int c) {
-        if(isPieceMenaced(piece))
+        ArrayList<ArrayList<ArrayList<Piece>>> army = (piece.color == Color.WHITE) ? blackPossibleMove : whitePossibleMove;
+
+        if(piece.getType() == PieceType.PAWN){
+            if(checkIfPawnIsMenacedByEnPassant(piece))
+                return true;
+            if(army.get(piece.getPosR()).get(piece.getPosC()).isEmpty())
+                return false;
+            if(army.get(piece.getPosR()).get(piece.getPosC()).size() == 1 &&
+                    army.get(piece.getPosR()).get(piece.getPosC()).get(0).getType() == PieceType.KING) //Assuming this has already been tried
+                return false;
             return true;
+        }
+
+        if(isPieceMenaced(piece))
+            if(army.get(piece.getPosR()).get(piece.getPosC()).size() != 1) {
+                return true;
+            } else{
+                if(army.get(piece.getPosR()).get(piece.getPosC()).get(0).getType() != PieceType.KING)
+                    return true;
+            }
 
         if(piece.type == PieceType.KNIGHT)
             return false;
 
         //Note that we can never block an attack of this type with a pawn, unless it directly eat the attacking piece
-        ArrayList<ArrayList<ArrayList<Piece>>> army = (piece.color == Color.WHITE) ? blackPossibleMove : whitePossibleMove;
         int aR = piece.getPosR(), aC = piece.getPosC();
         if(aR != r) aR += signum(r - aR);
         if(aC != c) aC += signum(c - aC);
@@ -126,6 +178,10 @@ public class BackgroundOverlay {
     //Should be an isolated simulation of a move
     public static void  wouldEndInKingCheck(Move m){
         boolean res = false;
+
+        //Just create a fake move
+        if(m.isEnPassant())
+            m = new Move(m.getSourceRow(), m.getSourceColumns(), m.getSourceRow(), m.getTargetColumns(), board);
 
         board.getTile(m.getTargetRow(), m.getTargetColumns()).setPiece(m.getSourcePiece());
         board.getTile(m.getSourceRow(), m.getSourceColumns()).setPiece(null);
@@ -200,37 +256,7 @@ public class BackgroundOverlay {
     }
 
     private static boolean pawnIsMenacingTile(int r, int c, Color movingColor) {
-        if(Board.IndexOutOfRange(r, c))
-            return false;
-
-        if(movingColor == Color.WHITE){
-            if(!Board.IndexOutOfRange(r-1, c+1)) {
-                if (board.getPiece(r - 1, c + 1) != null) {
-                    if (board.getPiece(r - 1, c + 1).type == PieceType.PAWN && board.getPiece(r - 1, c + 1).color == Color.BLACK)
-                        return true;
-                }
-            }
-            if(!Board.IndexOutOfRange(r-1, c-1)) {
-                if (board.getPiece(r - 1, c - 1) != null) {
-                    if (board.getPiece(r - 1, c - 1).type == PieceType.PAWN && board.getPiece(r - 1, c - 1).color == Color.BLACK)
-                        return true;
-                }
-            }
-        } else{
-            if(!Board.IndexOutOfRange(r+1, c+1)) {
-                if (board.getPiece(r + 1, c + 1) != null) {
-                    if (board.getPiece(r + 1, c + 1).type == PieceType.PAWN && board.getPiece(r + 1, c + 1).color == Color.WHITE)
-                        return true;
-                }
-            }
-            if(!Board.IndexOutOfRange(r+1, c-1)) {
-                if (board.getPiece(r + 1, c - 1) != null) {
-                    if (board.getPiece(r + 1, c - 1).type == PieceType.PAWN && board.getPiece(r + 1, c - 1).color == Color.WHITE)
-                        return true;
-                }
-            }
-        }
-        return false;
+        return getPawnMenacingTile(r, c, movingColor) != null;
     }
 
     private static void createArmies() {
