@@ -410,36 +410,27 @@ public class BackgroundOverlay {
                         }catch(Exception e){}
             }
             //Finish of EnPassant
-            if(!Board.IndexOutOfRange(p.getPosR()+(p.getColor() == Color.BLACK ? 1 : -1), p.getPosC()))
-                try{
-                    wouldEndInKingCheck(new Move(p.getPosR(), p.getPosC(), p.getPosR()+(p.getColor() == Color.BLACK ? 1 : -1), p.getPosC(), board));
-                    possibleTiles.add(new Tile(p.getPosR()+(p.getColor() == Color.BLACK ? 1 : -1), p.getPosC(), null));
-                }catch (Exception e){}
-            if(!Board.IndexOutOfRange(p.getPosR()+(p.getColor() == Color.BLACK ? 1 : -1), p.getPosC()) && ((Pawn)p).isFirstMove())
-                try{
-                    wouldEndInKingCheck(new Move(p.getPosR(), p.getPosC(), p.getPosR()+(p.getColor() == Color.BLACK ? 2 : -2), p.getPosC(), board));
-                    possibleTiles.add(new Tile(p.getPosR()+(p.getColor() == Color.BLACK ? 2 : -2), p.getPosC(), null));
-                }catch (Exception e){}
             if(!Board.IndexOutOfRange(p.getPosR()+(p.getColor() == Color.BLACK ? 1 : -1), p.getPosC()+1))
-                if(board.getPiece(p.getPosR()+(p.getColor() == Color.BLACK ? 1 : -1), p.getPosC()+1) != null)
+                if(board.getPiece(p.getPosR()+(p.getColor() == Color.BLACK ? 1 : -1), p.getPosC()+1) != null &&
+                        board.getPiece(p.getPosR()+(p.getColor() == Color.BLACK ? 1 : -1), p.getPosC()+1).getColor() != p.getColor())
                     try{
                         wouldEndInKingCheck(new Move(p.getPosR(), p.getPosC(), p.getPosR()+(p.getColor() == Color.BLACK ? 1 : -1), p.getPosC()+1, board));
                         possibleTiles.add(new Tile(p.getPosR()+(p.getColor() == Color.BLACK ? 1 : -1), p.getPosC()+1, null));
                     }catch (Exception e){}
             if(!Board.IndexOutOfRange(p.getPosR()+(p.getColor() == Color.BLACK ? 1 : -1), p.getPosC()-1))
-                if(board.getPiece(p.getPosR()+(p.getColor() == Color.BLACK ? 1 : -1), p.getPosC()-1) != null)
+                if(board.getPiece(p.getPosR()+(p.getColor() == Color.BLACK ? 1 : -1), p.getPosC()-1) != null &&
+                        board.getPiece(p.getPosR()+(p.getColor() == Color.BLACK ? 1 : -1), p.getPosC()-1).getColor() != p.getColor())
                     try{
                         wouldEndInKingCheck(new Move(p.getPosR(), p.getPosC(), p.getPosR()+(p.getColor() == Color.BLACK ? 1 : -1), p.getPosC()-1, board));
                         possibleTiles.add(new Tile(p.getPosR()+(p.getColor() == Color.BLACK ? 1 : -1), p.getPosC()-1, null));
                     }catch (Exception e){}
-            return possibleTiles; //Wanna end here;
         }
 
         for(int i = 0; i < Board.getRows(); i++)
             for(int j = 0; j < Board.getColumns(); j++) {
                 if(army.get(i).get(j).contains(p)) {
                     if (board.getPiece(i, j) != null) {
-                        if (board.getPiece(i, j).getColor() != p.getColor()) {
+                        if (board.getPiece(i, j).getColor() != p.getColor() && p.getType() != PieceType.PAWN) {
                             Move m = new Move(p.getPosR(), p.getPosC(), i, j, board);
                             try {
                                 wouldEndInKingCheck(m);

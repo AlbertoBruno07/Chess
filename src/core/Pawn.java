@@ -40,6 +40,7 @@ public class Pawn extends Piece{
                 insertPiece(this, r + 1, c);
 
         if(getPosR() == ((color == Color.WHITE) ? 6 : 1))
-            insertPiece(this, r + ((color == Color.WHITE) ? -2 : 2), c);
+            if(board.getPiece((color == Color.WHITE) ? 5 : 2, c) == null)
+                insertPiece(this, r + ((color == Color.WHITE) ? -2 : 2), c);
     }
 }
