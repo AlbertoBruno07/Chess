@@ -1,8 +1,11 @@
 package gui.GameFrame;
 
 import javax.sound.sampled.*;
+import java.io.BufferedInputStream;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
+import java.net.URL;
 
 import Settings.Settings;
 
@@ -15,7 +18,7 @@ public class PlaySound {
         String soundPackage = Settings.getSelectedSoundPackage();
         try {
             instance.move = AudioSystem.getClip();
-            instance.move.open(AudioSystem.getAudioInputStream((new File("src/sounds/"+soundPackage+"/Move.wav")).getAbsoluteFile()));
+            instance.move.open(AudioSystem.getAudioInputStream(instance.getClass().getClassLoader().getResource("./sounds/"+soundPackage+"/Move.wav")));
         } catch (UnsupportedAudioFileException e) {
             System.out.println("[Sound] Unsupported audio file for Move");
         } catch (IOException e) {
@@ -25,7 +28,7 @@ public class PlaySound {
         }
         try {
             instance.capture = AudioSystem.getClip();
-            instance.capture.open(AudioSystem.getAudioInputStream((new File("src/sounds/"+soundPackage+"/Capture.wav")).getAbsoluteFile()));
+            instance.capture.open(AudioSystem.getAudioInputStream((instance.getClass().getClassLoader().getResource("./sounds/"+soundPackage+"/Capture.wav"))));
         } catch (UnsupportedAudioFileException e) {
             System.out.println("[Sound] Unsupported audio file for Capture");
         } catch (IOException e) {
