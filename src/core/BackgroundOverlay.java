@@ -155,7 +155,7 @@ public class BackgroundOverlay {
         }
 
         if(isPieceMenaced(piece)) {
-            if (pawnIsMenacingTile(r, c, piece.color == Color.WHITE ? Color.BLACK : Color.WHITE))
+            if (pawnIsMenacingTile(piece.getPosR(), piece.getPosC(), piece.color))
                 return true;
             if (army.get(piece.getPosR()).get(piece.getPosC()).size() - notToBeCounted > 0)
                 return true;
@@ -170,9 +170,13 @@ public class BackgroundOverlay {
         if(aR != r) aR += signum(r - aR);
         if(aC != c) aC += signum(c - aC);
         while(aR != r || aC != c){
-            if(!army.get(aR).get(aC).isEmpty())
-                if(!(army.get(aR).get(aC).size() == 1 && (army.get(aR).get(aC).get(0).type == PieceType.KING)))
+            if(!army.get(aR).get(aC).isEmpty()) {
+                if(army.get(aR).get(aC).size() == 1)
+                    if(army.get(aR).get(aC).get(0).type != PieceType.KING)
+                        return true;
+                if(army.get(aR).get(aC).size() > 1)
                     return true;
+            }
             if(aR != r) aR += signum(r - aR);
             if(aC != c) aC += signum(c - aC);
         }
