@@ -36,13 +36,13 @@ public class PlaySound {
     }
 
     public static void playMove(){
-        instance.move.start();
         instance.move.setFramePosition(0);
+        instance.move.start();
     }
 
     public static void playCapture(){
-        instance.capture.start();
         instance.capture.setFramePosition(0);
+        instance.capture.start();
     }
 
 }
