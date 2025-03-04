@@ -7,14 +7,28 @@ import java.util.ArrayList;
 
 public class Settings implements Serializable {
     private String selectedIconPackage;
+    private String selectedSoundPackage;
     private static Settings instance = new Settings();
     
     private static ArrayList<String> possibleIconPacksAL;
     public static String[] possibleIconPacks;
 
+    private static ArrayList<String> possibleSoundPacksAL;
+    public static String[] possibleSoundPacks;
+
     public static void initializeSettings(){
         initializeInstance();
-        loadPossibleIconPacks();
+
+        possibleIconPacksAL = loadPossiblePacks("icons");
+        possibleIconPacks = new String[possibleIconPacksAL.size()];
+        for(int i = 0; i < possibleIconPacksAL.size(); i++)
+            possibleIconPacks[i] = possibleIconPacksAL.get(i);
+
+        possibleSoundPacksAL = loadPossiblePacks("sounds");
+        possibleSoundPacks = new String[possibleSoundPacksAL.size()];
+        for(int i = 0; i < possibleIconPacksAL.size(); i++)
+            possibleSoundPacks[i] = possibleSoundPacksAL.get(i);
+
         try{
             instance.validateSettings();
         } catch(InvalidSettingException ise){
@@ -25,17 +39,21 @@ public class Settings implements Serializable {
     private void validateSettings() {
         if(!possibleIconPacksAL.contains(selectedIconPackage)){
             selectedIconPackage = "Standard";
-            throw new InvalidSettingException("Invalid icon package. Using Standard package.");
+            throw new InvalidSettingException("[Settings] Invalid icon package. Using Standard package.");
+        }
+        if(!possibleSoundPacksAL.contains(selectedSoundPackage)){
+            selectedSoundPackage = "Standard";
+            throw new InvalidSettingException("[Settings] Invalid icon package. Using Standard package.");
         }
     }
 
-    private static void loadPossibleIconPacks() {
-        possibleIconPacksAL = new ArrayList<String>();
+    private static ArrayList<String> loadPossiblePacks(String targetPackage) {
+        ArrayList<String> possiblePacksAL = new ArrayList<String>();
         try {
-            BufferedReader in =new BufferedReader (new FileReader("./src/icons/packages.jcp"));
+            BufferedReader in =new BufferedReader (new FileReader("./src/" + targetPackage + "/packages.jcp"));
             String line = in.readLine();
             while(line != null){
-                possibleIconPacksAL.add(line);
+                possiblePacksAL.add(line);
                 line = in.readLine();
             }
         } catch (FileNotFoundException e) {
@@ -44,12 +62,10 @@ public class Settings implements Serializable {
             System.out.println("[Settings] Cannot read line");
         }
         //If sth went wrong, use the Standard package
-        if(possibleIconPacksAL.isEmpty())
-            possibleIconPacksAL.add("Standard");
+        if(possiblePacksAL.isEmpty())
+            possiblePacksAL.add("Standard");
 
-        possibleIconPacks = new String[possibleIconPacksAL.size()];
-        for(int i = 0; i < possibleIconPacksAL.size(); i++)
-            possibleIconPacks[i] = possibleIconPacksAL.get(i);
+        return possiblePacksAL;
     }
 
     public static void initializeInstance(){
@@ -75,6 +91,14 @@ public class Settings implements Serializable {
 
     public static void setSelectedIconPackage(String selectedIconPackage) {
         instance.selectedIconPackage = selectedIconPackage;
+    }
+
+    public static String getSelectedSoundPackage(){
+        return instance.selectedSoundPackage;
+    }
+
+    public static void setSelectedSoundPackage(String selectedSoundPackage){
+        instance.selectedSoundPackage = selectedSoundPackage;
     }
 
     public static Settings getInstance() {

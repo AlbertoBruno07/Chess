@@ -9,6 +9,7 @@ import java.awt.event.ActionListener;
 
 public class SettingsPanel extends JFrame{
     private JComboBox<String> selectIconPackage;
+    private JComboBox<String> selectSoundPackage;
     private static SettingsPanel instance;
 
     private static boolean isOpened;
@@ -34,6 +35,18 @@ public class SettingsPanel extends JFrame{
         setSelectedIconPackageAsDefault();
         add(selectIconPackage);
 
+        JLabel setSound = new JLabel("Sound Pack:");
+        setSound.setSize(100, 50);
+        setSound.setLocation(40, 65);
+        setSound.setForeground(Color.WHITE);
+        add(setSound);
+
+        selectSoundPackage = new JComboBox<>(Settings.possibleSoundPacks);
+        selectSoundPackage.setBounds(150, 50, 120, 20);
+        selectSoundPackage.setLocation(130, 80);
+        setSelectedSoundPackageAsDefault();
+        add(selectSoundPackage);
+
         JButton apply = new JButton("Apply");
         apply.setBorderPainted(false);
         apply.setFocusPainted(false);
@@ -47,12 +60,17 @@ public class SettingsPanel extends JFrame{
         add(apply);
     }
 
+    private void setSelectedSoundPackageAsDefault() {
+        selectSoundPackage.setSelectedItem(Settings.getSelectedSoundPackage());
+    }
+
     private void setSelectedIconPackageAsDefault() {
         selectIconPackage.setSelectedItem(Settings.getSelectedIconPackage());
     }
 
     private void apply() {
         Settings.setSelectedIconPackage((String) selectIconPackage.getSelectedItem());
+        Settings.setSelectedSoundPackage((String) selectSoundPackage.getSelectedItem());
         Settings.saveToFile();
         dispose();
     }

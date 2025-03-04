@@ -187,10 +187,15 @@ public class BoardPanel extends JPanel {
     }
 
     private void processMove(int sourceRow, int sourceColumn, int targetRow, int targetColumn) {
+        boolean isEating = game.getBoard().getPiece(targetRow, targetColumn) != null;
         if(game.processMove(sourceRow, sourceColumn, targetRow, targetColumn, this)){
             Piece tP = game.getBoard().getPiece(targetRow, targetColumn);
             clearPiece(sourceRow, sourceColumn);
             drawPiece(targetRow, targetColumn, tP.getType(), tP.getColor());
+            if(isEating)
+                PlaySound.playCapture();
+            else
+                PlaySound.playMove();
         }
     }
 
@@ -199,6 +204,7 @@ public class BoardPanel extends JPanel {
         clearPiece(r, rSC);
         drawPiece(r, kTC, PieceType.KING, (r == 7 ? Color.WHITE : Color.BLACK));
         drawPiece(r, rTC, PieceType.ROOK, (r == 7 ? Color.WHITE : Color.BLACK));
+        PlaySound.playMove();
     }
 
     public void kingIsInCheck(Color c){
@@ -210,6 +216,7 @@ public class BoardPanel extends JPanel {
         clearPiece(m.getSourceRow(), m.getSourceColumns());
         clearPiece(m.getSourceRow(), m.getTargetColumns());
         drawPiece(m.getTargetRow(), m.getTargetColumns(), m.getSourcePiece().getType(), m.getSourcePiece().getColor());
+        PlaySound.playCapture();
     }
 
     public void highlightMenacedPiece(int r, int c){

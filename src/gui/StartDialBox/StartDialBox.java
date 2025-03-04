@@ -1,6 +1,7 @@
 package gui.StartDialBox;
 
 import Settings.Settings;
+import gui.GameFrame.PlaySound;
 
 import javax.swing.*;
 import java.awt.*;
@@ -75,6 +76,7 @@ public class StartDialBox {
 
     private void startNormalGame() {
         if(!SettingsPanel.isOpened()) {
+            PlaySound.initializePlaySound();
             launchGui(blackIcon);
             mainFrame.setVisible(false);
         }
