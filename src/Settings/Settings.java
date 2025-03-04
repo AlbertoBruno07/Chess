@@ -26,7 +26,7 @@ public class Settings implements Serializable {
 
         possibleSoundPacksAL = loadPossiblePacks("sounds");
         possibleSoundPacks = new String[possibleSoundPacksAL.size()];
-        for(int i = 0; i < possibleIconPacksAL.size(); i++)
+        for(int i = 0; i < possibleSoundPacksAL.size(); i++)
             possibleSoundPacks[i] = possibleSoundPacksAL.get(i);
 
         try{
