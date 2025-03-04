@@ -88,7 +88,11 @@ public class BackgroundOverlay {
             return !(attackFromPieceCanBeBlocked(getPawnMenacingTile(r, c, color), r, c));
 
         //On the single tile I cannot resolve more than an attack
-        if(enemyArmy.get(r).get(c).size() == 1 && !pawnIsMenacingTile(r, c, color))
+        int notToBeCounted = 0;
+        for(Piece i : enemyArmy.get(r).get(c))
+            if(i.type == PieceType.KING || i.type == PieceType.PAWN)
+                notToBeCounted++;
+        if(enemyArmy.get(r).get(c).size()-notToBeCounted == 1 && !pawnIsMenacingTile(r, c, color))
             return !(attackFromPieceCanBeBlocked(enemyArmy.get(r).get(c).get(0), r, c));
 
         return true;
@@ -138,29 +142,30 @@ public class BackgroundOverlay {
     private static boolean attackFromPieceCanBeBlocked(Piece piece, int r, int c) {
         ArrayList<ArrayList<ArrayList<Piece>>> army = (piece.color == Color.WHITE) ? blackPossibleMove : whitePossibleMove;
 
+        //We do not wanna count pawns and king for eating a piece
+        int notToBeCounted = 0;
+        for(Piece i : army.get(piece.getPosR()).get(piece.getPosC()))
+            if(i.type == PieceType.KING || i.type == PieceType.PAWN)
+                notToBeCounted++;
+
         if(piece.getType() == PieceType.PAWN){
             if(checkIfPawnIsMenacedByEnPassant(piece))
                 return true;
-            if(army.get(piece.getPosR()).get(piece.getPosC()).isEmpty())
-                return false;
-            if(army.get(piece.getPosR()).get(piece.getPosC()).size() == 1 &&
-                    army.get(piece.getPosR()).get(piece.getPosC()).get(0).getType() == PieceType.KING) //Assuming this has already been tried
-                return false;
-            return true;
+            return army.get(piece.getPosR()).get(piece.getPosC()).size()-notToBeCounted > 0;
         }
 
-        if(isPieceMenaced(piece))
-            if(army.get(piece.getPosR()).get(piece.getPosC()).size() != 1) {
+        if(isPieceMenaced(piece)) {
+            if (pawnIsMenacingTile(r, c, piece.color == Color.WHITE ? Color.BLACK : Color.WHITE))
                 return true;
-            } else{
-                if(army.get(piece.getPosR()).get(piece.getPosC()).get(0).getType() != PieceType.KING)
-                    return true;
-            }
+            if (army.get(piece.getPosR()).get(piece.getPosC()).size() - notToBeCounted > 0)
+                return true;
+            else
+                return false;
+        }
 
         if(piece.type == PieceType.KNIGHT)
             return false;
 
-        //Note that we can never block an attack of this type with a pawn, unless it directly eat the attacking piece
         int aR = piece.getPosR(), aC = piece.getPosC();
         if(aR != r) aR += signum(r - aR);
         if(aC != c) aC += signum(c - aC);
