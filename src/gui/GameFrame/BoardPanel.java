@@ -174,7 +174,7 @@ public class BoardPanel extends JPanel {
         URL url = getClass().getClassLoader().getResource(iconName);
         try {
             BufferedImage img = ImageIO.read(url);
-            BufferedImage rImg = new BufferedImage(img.getHeight(), img.getWidth(), img.getType());
+            BufferedImage rImg = new BufferedImage(img.getHeight(), img.getWidth(), 6); //Force to use a specific type of image
             Graphics2D g2d = rImg.createGraphics();
             g2d.rotate(Math.PI /2, img.getHeight()/2.0f, img.getWidth()/2.0f);
             g2d.drawImage(img, null, 0, 0);
