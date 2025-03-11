@@ -8,6 +8,13 @@ public class Board {
     static final int LastRow = Rows-1;
     static final int LastColumn = Columns -1;
 
+    public Board(Board board) {
+        this.board = new Tile[Rows][Columns];
+        for(int i = 0; i < Rows; i++)
+            for(int j = 0; j < Columns; j++)
+                this.board[i][j] = new Tile(board.getTile(i, j));
+    }
+
     public static int getRows(){
         return Rows;
     }

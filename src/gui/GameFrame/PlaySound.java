@@ -1,6 +1,7 @@
 package gui.GameFrame;
 
 import javax.sound.sampled.*;
+import javax.swing.*;
 import java.io.BufferedInputStream;
 import java.io.File;
 import java.io.FileInputStream;
@@ -16,6 +17,7 @@ public class PlaySound {
 
     public static void initializePlaySound(){
         String soundPackage = Settings.getSelectedSoundPackage();
+
         try {
             instance.move = AudioSystem.getClip();
             instance.move.open(AudioSystem.getAudioInputStream(instance.getClass().getClassLoader().getResource("./sounds/"+soundPackage+"/Move.wav")));
@@ -26,6 +28,7 @@ public class PlaySound {
         } catch (LineUnavailableException e) {
             System.out.println("[Sound] Cannot open audio clip");
         }
+
         try {
             instance.capture = AudioSystem.getClip();
             instance.capture.open(AudioSystem.getAudioInputStream((instance.getClass().getClassLoader().getResource("./sounds/"+soundPackage+"/Capture.wav"))));
@@ -36,16 +39,25 @@ public class PlaySound {
         }catch (LineUnavailableException e) {
             System.out.println("[Sound] Cannot open audio clip");
         }
+
     }
 
     public static void playMove(){
-        instance.move.setFramePosition(0);
-        instance.move.start();
+
+        SwingUtilities.invokeLater( () -> {
+            instance.move.setFramePosition(0);
+            instance.move.start();
+        });
+
     }
 
     public static void playCapture(){
-        instance.capture.setFramePosition(0);
-        instance.capture.start();
+
+        SwingUtilities.invokeLater( () -> {
+            instance.capture.setFramePosition(0);
+            instance.capture.start();
+        });
+
     }
 
 }

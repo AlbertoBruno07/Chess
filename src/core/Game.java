@@ -1,5 +1,6 @@
 package core;
 
+import gui.GameFrame.AsideWindow;
 import gui.GameFrame.BoardPanel;
 
 import javax.swing.*;
@@ -13,6 +14,7 @@ public class Game {
     private static Piece possibleEnPassant;
     private static int timeFromEnPassantUpdate;
     private BackgroundOverlay backgroundOverlay;
+    private MovesHistory mH;
 
     public static Piece getPossibleEnPassant() {
         return possibleEnPassant;
@@ -31,11 +33,12 @@ public class Game {
         turn = Color.WHITE;
         blackArmy = new ArrayList<>();
         whiteArmy = new ArrayList<>();
+        mH = new MovesHistory();
         board = new Board();
         setup();
-        backgroundOverlay = BackgroundOverlay.getInstance(board);
-        BackgroundOverlay.setKing((King)board.getPiece(0, 4), Color.BLACK);
-        BackgroundOverlay.setKing((King)board.getPiece(7, 4), Color.WHITE);
+        backgroundOverlay = BackgroundOverlay.getStaticInstance(board);
+        BackgroundOverlay.getStaticInstance().setKing((King)board.getPiece(0, 4), Color.BLACK);
+        BackgroundOverlay.getStaticInstance().setKing((King)board.getPiece(7, 4), Color.WHITE);
     }
 
     private void createArmy(ArrayList<Piece> arrayList, Color color){
@@ -120,29 +123,33 @@ public class Game {
         //Managing it as a completely separated case
         if(move.isACastlingMove()){
             if(turn == Color.BLACK)
-                BackgroundOverlay.getBlackKing().updateFM();
+                BackgroundOverlay.getStaticInstance().getBlackKing().updateFM();
             else
-                BackgroundOverlay.getWhiteKing().updateFM();
+                BackgroundOverlay.getStaticInstance().getWhiteKing().updateFM();
             manageCastling(move, bp);
             switchTurn();
+            mH.insertAMove(move);
+
             return false; //Do not wanna render normally, let BoardPanel believe the move is invalid
         }
 
         if(move.isPawnPromotionMove()){
             managePawnPromotion(move, bp);
             switchTurn();
+            mH.insertAMove(move);
             return true; //Wanna render normally
         }
 
         if(move.isEnPassant()){
             manageEnPassant(move, bp);
+            mH.insertAMove(move);
             return false; //Do not wanna render normally, let BoardPanel believe the move is invalid
         }
 
         try{
             board.getPiece(sR, sC).validateMove(move);
             //move.wouldEndInKingCheck(backgroundOverlay);
-            BackgroundOverlay.wouldEndInKingCheck(move);
+            BackgroundOverlay.getStaticInstance().wouldEndInKingCheck(move);
             if(board.getPiece(tR, tC) != null) {
                 if (board.getPiece(sR, sC).color == board.getPiece(tR, tC).color)
                     return false;
@@ -155,9 +162,10 @@ public class Game {
                 timeFromEnPassantUpdate++;
             if(timeFromEnPassantUpdate > 1)
                 setPossibleEnPassant(null);
-            BackgroundOverlay.processMove(move);
+            BackgroundOverlay.getStaticInstance().processMove(move);
             if(board.getPiece(tR, tC).type == PieceType.PAWN)
                 ((Pawn)board.getPiece(tR, tC)).updateFM();
+            mH.insertAMove(move);
             return true;
         } catch(InvalidMoveException ime){
             System.out.println(ime);
@@ -167,7 +175,7 @@ public class Game {
 
     private void manageEnPassant(Move m, BoardPanel bp) {
         try{
-            BackgroundOverlay.wouldEndInKingCheck(m);
+            BackgroundOverlay.getStaticInstance().wouldEndInKingCheck(m);
         } catch (Exception e){
             System.out.println(e);
             return;
@@ -179,7 +187,7 @@ public class Game {
         Piece removedPiece = board.getPiece(m.getSourceRow(), m.getTargetColumns());
         board.getTile(m.getSourceRow(), m.getTargetColumns()).setPiece(null);
         bp.processEnPassant(m);
-        BackgroundOverlay.processEnPassant(m, removedPiece);
+        BackgroundOverlay.getStaticInstance().processEnPassant(m, removedPiece);
         switchTurn();
     }
 
@@ -202,7 +210,7 @@ public class Game {
         board.getTile(move.getSourceRow(), move.getSourceColumns()).setPiece(null);
         removePieceFromArmy(move.sourcePiece);
         addPieceToArmy(nP);
-        BackgroundOverlay.processPawnPromotion(move, nP);
+        BackgroundOverlay.getStaticInstance().processPawnPromotion(move, nP);
     }
 
     public void manageCastling(Move m, BoardPanel bp){
@@ -226,12 +234,15 @@ public class Game {
         board.getTile(m.getSourceRow(), m.getSourceColumns()).setPiece(null);
         board.getTile(m.getTargetRow(), m.getTargetColumns()).setPiece(null);
 
-        BackgroundOverlay.processMove(mR);
-        BackgroundOverlay.processMove(mK);
+        BackgroundOverlay.getStaticInstance().processMove(mR);
+        BackgroundOverlay.getStaticInstance().processMove(mK);
     }
 
     private void switchTurn() {
         turn = (turn == Color.WHITE) ? Color.BLACK : Color.WHITE;
     }
 
+    public MovesHistory getMovesHistory() {
+        return mH;
+    }
 }

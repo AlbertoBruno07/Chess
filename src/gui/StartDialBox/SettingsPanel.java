@@ -1,6 +1,7 @@
 package gui.StartDialBox;
 
 import Settings.Settings;
+import gui.GameFrame.IconManager;
 
 import javax.swing.*;
 import java.awt.*;
@@ -12,9 +13,11 @@ public class SettingsPanel extends JFrame{
     private JComboBox<String> selectSoundPackage;
     private static SettingsPanel instance;
 
+    private StartDialBox startDialBox;
+
     private static boolean isOpened;
 
-    private SettingsPanel(Image icon) {
+    private SettingsPanel(Image icon, StartDialBox startDialBox) {
         setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE); //Do not wanna leave pending object
         setSize(300, 400);
         setIconImage(icon);
@@ -58,6 +61,8 @@ public class SettingsPanel extends JFrame{
             }
         });
         add(apply);
+
+        this.startDialBox = startDialBox;
     }
 
     private void setSelectedSoundPackageAsDefault() {
@@ -72,13 +77,14 @@ public class SettingsPanel extends JFrame{
         Settings.setSelectedIconPackage((String) selectIconPackage.getSelectedItem());
         Settings.setSelectedSoundPackage((String) selectSoundPackage.getSelectedItem());
         Settings.saveToFile();
+        startDialBox.updateIconManager(new IconManager());
         dispose();
     }
 
-    public static SettingsPanel getInstance(Image icon){
+    public static SettingsPanel getInstance(Image icon, StartDialBox startDialBox){
         isOpened = true;
         if(instance == null)
-            instance = new SettingsPanel(icon);
+            instance = new SettingsPanel(icon, startDialBox);
         instance.setVisible(true);
         return instance;
     }

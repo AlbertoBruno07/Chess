@@ -12,6 +12,13 @@ public class Tile {
         piece = null;
     }
 
+    public Tile(Tile tile){
+        row = tile.row;
+        column = tile.column;
+        color = tile.color;
+        piece = tile.getPiece();
+    }
+
     public Piece getPiece() {
         return piece;
     }

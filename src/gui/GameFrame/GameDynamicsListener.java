@@ -34,8 +34,10 @@ public class GameDynamicsListener implements MouseListener, MouseMotionListener 
 
     @Override
     public void mousePressed(MouseEvent e) {
-        int c = getTileC(e.getX()), r = getTileR(e.getY());
-        bP.onMove(r, c);
+        if(!AsideWindow.isOnPreviewsBoard) {
+            int c = getTileC(e.getX()), r = getTileR(e.getY());
+            bP.onMove(r, c);
+        }
     }
 
     @Override
@@ -60,7 +62,9 @@ public class GameDynamicsListener implements MouseListener, MouseMotionListener 
 
     @Override
     public void mouseMoved(MouseEvent e) {
-        int c = getTileC(e.getX()), r = getTileR(e.getY());
-        bP.movePreview(r, c, false);
+        if(!AsideWindow.isOnPreviewsBoard) {
+            int c = getTileC(e.getX()), r = getTileR(e.getY());
+            bP.movePreview(r, c, false);
+        }
     }
 }

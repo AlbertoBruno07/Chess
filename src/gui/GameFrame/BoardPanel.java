@@ -4,23 +4,9 @@ import Settings.Settings;
 import core.*;
 import core.Color;
 
-import javax.imageio.ImageIO;
 import javax.swing.*;
 import java.awt.*;
-import java.awt.font.FontRenderContext;
-import java.awt.font.GlyphVector;
-import java.awt.geom.AffineTransform;
-import java.awt.image.BufferedImage;
-import java.awt.image.BufferedImageOp;
-import java.awt.image.ImageObserver;
-import java.awt.image.RenderedImage;
-import java.awt.image.renderable.RenderableImage;
-import java.io.IOException;
-import java.net.URL;
-import java.text.AttributedCharacterIterator;
 import java.util.ArrayList;
-import java.util.Map;
-import java.util.concurrent.TimeoutException;
 
 public class BoardPanel extends JPanel {
     static final int TILE_DIMENSION = 100;
@@ -32,8 +18,11 @@ public class BoardPanel extends JPanel {
     private int sourceRow, sourceColumn;
     private boolean moveIsOnGoing;
     private ArrayList<Tile> possibleMoves;
+    private IconManager iconManager;
 
-    //Using a class to make easier the detection fo the right component
+    private boolean isReversed;
+
+    //Using a class to make easier the detection of the right component
     private class circle extends JPanel{
         java.awt.Color color;
         public circle(java.awt.Color color) {
@@ -52,12 +41,19 @@ public class BoardPanel extends JPanel {
     }
 
 
-    public BoardPanel(Game game) {
+    public BoardPanel(Game game, IconManager iM) {
         super();
         this.game = game;
         moveIsOnGoing = false;
+        iconManager = iM;
+        isReversed = false;
+        long iniT = System.nanoTime();
         initializeLayout();
+        System.out.println("[InitializeLayout] exT = " + (System.nanoTime() - iniT));
+        iniT = System.nanoTime();
         initializeGame();
+        System.out.println("[InitializeGame] exT = " + (System.nanoTime() - iniT) + "\n");
+        iniT = System.nanoTime();
     }
 
     private void initializeLayout() {
@@ -113,32 +109,13 @@ public class BoardPanel extends JPanel {
         tiles[r][c].updateUI();
     }
 
-    private String makeIconName(PieceType pT, Color c){
-        return "icons/" + Settings.getSelectedIconPackage() + "/" + (c == Color.WHITE ? "W" : "B") + letterForPiece(pT) + ".png";
-    }
-
     public void drawPiece(int r, int c, PieceType pT, Color color){
-        String iconName = makeIconName(pT, color);
-        URL url = getClass().getClassLoader().getResource(iconName);
-        Image image = new ImageIcon(url).getImage();
-        image = image.getScaledInstance(TILE_DIMENSION, TILE_DIMENSION,
-                Image.SCALE_SMOOTH);
-        JLabel label = new JLabel(new ImageIcon(image));
         tiles[r][c].removeAll();
-        tiles[r][c].add(label);
+        tiles[r][c].add(new JLabel(iconManager.getIcon(pT, color)));
         tiles[r][c].updateUI();
     }
 
-    private String letterForPiece(PieceType pT) {
-        return switch (pT){
-            case KING -> "K";
-            case PAWN -> "P";
-            case ROOK -> "R";
-            case QUEEN -> "Q";
-            case BISHOP -> "B";
-            case KNIGHT -> "N";
-        };
-    }
+
 
     public void onMove(int r, int c){
         if(!moveIsOnGoing){
@@ -155,35 +132,24 @@ public class BoardPanel extends JPanel {
             processMove(sourceRow, sourceColumn, r, c);
             unhighlightSourceTile(sourceRow, sourceColumn);
             kingIsInCheck(game.getTurn());
-            if(BackgroundOverlay.checkMate(game.getTurn()))
+            if(BackgroundOverlay.getStaticInstance().checkMate(game.getTurn()))
                 drawCheckMate(game.getTurn());
             Color inverseTurn = game.turn == Color.WHITE ? Color.BLACK : Color.WHITE;
-            tiles[BackgroundOverlay.getKingR(inverseTurn)][BackgroundOverlay.getKingC(inverseTurn)]
-                    .setBackground(determineTileColor(BackgroundOverlay.getKingR(inverseTurn),
-                                    BackgroundOverlay.getKingC(inverseTurn)));
+            tiles[BackgroundOverlay.getStaticInstance().getKingR(inverseTurn)][BackgroundOverlay.getStaticInstance().getKingC(inverseTurn)]
+                    .setBackground(determineTileColor(BackgroundOverlay.getStaticInstance().getKingR(inverseTurn),
+                                    BackgroundOverlay.getStaticInstance().getKingC(inverseTurn)));
             //The king position could have been changed, but this is not a problem since
             //that means it has been moved, so unhighlightSourceTile will clear that tile automatically
         }
     }
 
     private void drawCheckMate(Color turn) {
-        int r = BackgroundOverlay.getKingR(turn), c = BackgroundOverlay.getKingC(turn);
+        int r = BackgroundOverlay.getStaticInstance().getKingR(turn),
+                c = BackgroundOverlay.getStaticInstance().getKingC(turn);
         clearPiece(r, c);
-
-        String iconName = makeIconName(PieceType.KING, turn);
-        URL url = getClass().getClassLoader().getResource(iconName);
-        try {
-            BufferedImage img = ImageIO.read(url);
-            BufferedImage rImg = new BufferedImage(img.getHeight(), img.getWidth(), 6); //Force to use a specific type of image
-            Graphics2D g2d = rImg.createGraphics();
-            g2d.rotate(Math.PI /2, img.getHeight()/2.0f, img.getWidth()/2.0f);
-            g2d.drawImage(img, null, 0, 0);
-            g2d.dispose();
-            JLabel label = new JLabel(new ImageIcon(rImg.getScaledInstance(TILE_DIMENSION, TILE_DIMENSION, Image.SCALE_SMOOTH)));
-            tiles[r][c].removeAll();
-            tiles[r][c].add(label);
-            tiles[r][c].updateUI();
-        } catch (IOException IOe){System.out.println("Cannot read icon!!");}
+        tiles[r][c].removeAll();
+        tiles[r][c].add(iconManager.getCheckMateLabel(turn));
+        tiles[r][c].updateUI();
     }
 
     private void processMove(int sourceRow, int sourceColumn, int targetRow, int targetColumn) {
@@ -207,9 +173,17 @@ public class BoardPanel extends JPanel {
         PlaySound.playMove();
     }
 
-    public void kingIsInCheck(Color c){
-        if(BackgroundOverlay.isKingInCheck(c))
-            tiles[BackgroundOverlay.getKingR(c)][BackgroundOverlay.getKingC(c)].setBackground(java.awt.Color.RED);
+    private void kingIsInCheck(Color c){
+        if(BackgroundOverlay.getStaticInstance().isKingInCheck(c)) {
+            highlightKingCheck(BackgroundOverlay.getStaticInstance().getKingR(c),
+                    BackgroundOverlay.getStaticInstance().getKingC(c));
+            MovesHistory.setCheckOnLastMove(BackgroundOverlay.getStaticInstance().getKingR(c),
+                    BackgroundOverlay.getStaticInstance().getKingC(c));
+        }
+    }
+
+    public void highlightKingCheck(int r, int c){
+        tiles[r][c].setBackground(java.awt.Color.RED);
     }
 
     public void processEnPassant(Move m) {
@@ -234,7 +208,7 @@ public class BoardPanel extends JPanel {
         if(game.getBoard().getPiece(r,c).getColor() != game.getTurn())
             return;
 
-        possibleMoves = BackgroundOverlay.getPossibleMoves(game.getBoard().getPiece(r,c));
+        possibleMoves = BackgroundOverlay.getStaticInstance().getPossibleMoves(game.getBoard().getPiece(r,c));
 
         for(var i : possibleMoves){
             if(game.getBoard().getPiece(i.getRow(), i.getColumn()) != null)
@@ -266,5 +240,29 @@ public class BoardPanel extends JPanel {
             }
             possibleMoves = null;
         }
+    }
+
+    public void reverseBoard(){
+        isReversed = !isReversed;
+
+        for(int i = 0; i < Board.getRows(); i++)
+            for(int j = 0; j < Board.getColumns(); j++){
+                clearPiece(i, j);
+                unhighlightSourceTile(i, j);
+            }
+
+        initializeGame();
+        kingIsInCheck(game.getTurn());
+    }
+
+    public void displayBoard(Board board) {
+        for(int i = 0; i < Board.getRows(); i++)
+            for(int j = 0; j< Board.getColumns(); j++){
+                clearPiece(i, j);
+                unhighlightSourceTile(i, j);
+                Piece p = board.getPiece(i, j);
+                if(p != null)
+                    drawPiece(i, j, p.getType(), p.getColor());
+            }
     }
 }

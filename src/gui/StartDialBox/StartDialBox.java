@@ -1,6 +1,7 @@
 package gui.StartDialBox;
 
 import Settings.Settings;
+import gui.GameFrame.IconManager;
 import gui.GameFrame.PlaySound;
 
 import javax.swing.*;
@@ -17,7 +18,10 @@ public class StartDialBox {
     private Image whiteIcon;
     private Image settingsGearIcon;
 
+    private static IconManager iconManager;
+
     public StartDialBox() {
+
         Settings.initializeSettings();
         loadIcon();
 
@@ -61,11 +65,17 @@ public class StartDialBox {
         label.setLocation(20, 15);
         mainFrame.add(label);
 
+        iconManager = new IconManager();
+
         mainFrame.setVisible(true);
     }
 
     private void settingsPanel() {
-        SettingsPanel p = SettingsPanel.getInstance(blackIcon);
+        SettingsPanel p = SettingsPanel.getInstance(blackIcon, this);
+    }
+
+    public void updateIconManager(IconManager iM){
+        iconManager = iM;
     }
 
     private void loadIcon() {
@@ -76,9 +86,12 @@ public class StartDialBox {
 
     private void startNormalGame() {
         if(!SettingsPanel.isOpened()) {
+            long iniT = System.nanoTime();
             PlaySound.initializePlaySound();
-            launchGui(blackIcon);
-            mainFrame.setVisible(false);
+            System.out.println("[Playsound] exT = " + (System.nanoTime() - iniT));
+            iniT = System.nanoTime();
+            launchGui(blackIcon, iconManager);
+            mainFrame.dispose();
         }
     }
 }

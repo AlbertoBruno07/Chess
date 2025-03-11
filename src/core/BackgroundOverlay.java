@@ -7,62 +7,73 @@ import static java.lang.Math.signum;
 public class BackgroundOverlay {
 
     private static BackgroundOverlay instance;
-    private static ArrayList<ArrayList<ArrayList<Piece>>> blackPossibleMove;
-    private static ArrayList<ArrayList<ArrayList<Piece>>> whitePossibleMove;
-    private static Board board;
-    private static King whiteKing;
-    private static King blackKing;
+    private ArrayList<ArrayList<ArrayList<Piece>>> blackPossibleMove;
+    private ArrayList<ArrayList<ArrayList<Piece>>> whitePossibleMove;
+    private Board board;
+    private King whiteKing;
+    private King blackKing;
 
     private BackgroundOverlay(Board board) {
-        BackgroundOverlay.board = board;
+        this.board = board;
 
         blackPossibleMove = new ArrayList<ArrayList<ArrayList<Piece>>>();
         whitePossibleMove = new ArrayList<ArrayList<ArrayList<Piece>>>();
-
-        createArmies();
-        initialize();
     }
 
-    public static King getWhiteKing() {
+    public BackgroundOverlay makeInstance(Board board, King whiteKing, King blackKing){
+        BackgroundOverlay newInstance = new BackgroundOverlay(board);
+        newInstance.setKing(whiteKing, Color.WHITE);
+        newInstance.setKing(blackKing, Color.BLACK);
+        return newInstance;
+    }
+
+    private void initialize(){
+        createArmies();
+        initializeArmies();
+    }
+
+    public King getWhiteKing() {
         return whiteKing;
     }
 
-    public static King getBlackKing() {
+    public King getBlackKing() {
         return blackKing;
     }
 
-    public static BackgroundOverlay getInstance(Board board){
-        if(instance == null)
+    public static BackgroundOverlay getStaticInstance(Board board){
+        if(instance == null) {
             instance = new BackgroundOverlay(board);
+            instance.initialize();
+        }
         return instance;
     }
 
-    public static BackgroundOverlay getInstance(){
+    public static BackgroundOverlay getStaticInstance(){
         return instance; //Can return null
     }
 
-    public static void setKing(King king, Color c){
+    public void setKing(King king, Color c){
         if(c == Color.WHITE)
             whiteKing = king;
         else
             blackKing = king;
     }
 
-    public static int getKingR(Color c){
+    public int getKingR(Color c){
         if(c == Color.WHITE)
             return whiteKing.getPosR();
         else
             return blackKing.getPosR();
     }
 
-    public static int getKingC(Color c){
+    public int getKingC(Color c){
         if(c == Color.WHITE)
             return whiteKing.getPosC();
         else
             return blackKing.getPosC();
     }
 
-    public static boolean checkMate(Color color){
+    public boolean checkMate(Color color){
         ArrayList<ArrayList<ArrayList<Piece>>> enemyArmy = (color == Color.BLACK) ? whitePossibleMove : blackPossibleMove;
         Piece king = (color == Color.WHITE) ? whiteKing : blackKing;
         int r = king.getPosR(), c = king.getPosC();
@@ -98,7 +109,7 @@ public class BackgroundOverlay {
         return true;
     }
 
-    private static Piece getPawnMenacingTile(int r, int c, Color color) {
+    private Piece getPawnMenacingTile(int r, int c, Color color) {
         if(Board.IndexOutOfRange(r, c))
             return null;
 
@@ -133,13 +144,13 @@ public class BackgroundOverlay {
         return null;
     }
 
-    private static boolean tileIsNotOccupiedByAlly(int r, int c, Color color) {
+    private boolean tileIsNotOccupiedByAlly(int r, int c, Color color) {
         if(board.getPiece(r,c) == null)
             return true;
         return  board.getPiece(r,c).color != color;
     }
 
-    private static boolean attackFromPieceCanBeBlocked(Piece piece, int r, int c) {
+    private boolean attackFromPieceCanBeBlocked(Piece piece, int r, int c) {
         ArrayList<ArrayList<ArrayList<Piece>>> army = (piece.color == Color.WHITE) ? blackPossibleMove : whitePossibleMove;
 
         //We do not wanna count pawns and king for eating a piece
@@ -185,7 +196,7 @@ public class BackgroundOverlay {
     }
 
     //Should be an isolated simulation of a move
-    public static void  wouldEndInKingCheck(Move m){
+    public void  wouldEndInKingCheck(Move m){
         boolean res = false;
 
         //Just create a fake move
@@ -209,11 +220,11 @@ public class BackgroundOverlay {
         }
     }
 
-    public static boolean isKingInCheck(Color kingColor){
+    public boolean isKingInCheck(Color kingColor){
         return isPieceMenaced(kingColor == Color.WHITE ? whiteKing : blackKing);
     }
 
-    public static boolean isPieceMenaced(Piece p){
+    public boolean isPieceMenaced(Piece p){
         if(p.type == PieceType.PAWN)
             if(checkIfPawnIsMenacedByEnPassant(p))
                 return true;
@@ -221,7 +232,7 @@ public class BackgroundOverlay {
         return isTileMenaced(p.getPosR(), p.getPosC(), p.color);
     }
 
-    private static boolean checkIfPawnIsMenacedByEnPassant(Piece p) {
+    private boolean checkIfPawnIsMenacedByEnPassant(Piece p) {
         if(p.type != PieceType.PAWN)
             return false;
 
@@ -244,7 +255,7 @@ public class BackgroundOverlay {
     }
 
     //If the king is menacing a tile we should check it can really go there, but for what is used it's ok
-    public static boolean isTileMenaced(int r, int c, Color color){
+    public boolean isTileMenaced(int r, int c, Color color){
         boolean res = false;
         if(color == Color.WHITE){
             res = !blackPossibleMove.get(r).get(c).isEmpty();
@@ -264,11 +275,11 @@ public class BackgroundOverlay {
         return res;
     }
 
-    private static boolean pawnIsMenacingTile(int r, int c, Color movingColor) {
+    private boolean pawnIsMenacingTile(int r, int c, Color movingColor) {
         return getPawnMenacingTile(r, c, movingColor) != null;
     }
 
-    private static void createArmies() {
+    private void createArmies() {
         for(int i = 0; i < Board.getRows(); i++){
             ArrayList<ArrayList<Piece>> al = new ArrayList<ArrayList<Piece>>();
             for(int j = 0; j < Board.getColumns(); j++){
@@ -287,7 +298,7 @@ public class BackgroundOverlay {
         }
     }
 
-    private static void initialize(){
+    private void initializeArmies(){
         for(int i = 0; i < Board.getRows(); i++){
             for(int j = 0; j < Board.getColumns(); j++){
                 Piece p = board.getPiece(i, j);
@@ -299,31 +310,35 @@ public class BackgroundOverlay {
         return;
     }
 
-    public static void pieceInsertion(Piece p, int r, int c){
+    public void pieceInsertion(Piece p, int r, int c){
         p.pieceInsertion(board, r, c);
     }
 
-    public static void pieceRemotion(Piece p, int r, int c){
+    public void pieceRemotion(Piece p, int r, int c){
         for(int i = 0; i < Board.getRows(); i++)
             for(int j = 0; j < Board.getColumns(); j++)
                 removePiece(p, i, j);
     }
 
-    public static void insertPiece(Piece p, int r, int c) {
+    public void insertPieceNotStatic(Piece p, int r, int c) {
         if(p.color == Color.WHITE)
             whitePossibleMove.get(r).get(c).add(p);
         else
             blackPossibleMove.get(r).get(c).add(p);
     }
 
-    public static void removePiece(Piece p, int r, int c){
+    public static void insertPiece(Piece p, int r, int c){
+        getStaticInstance().insertPieceNotStatic(p, r, c);
+    }
+
+    public void removePiece(Piece p, int r, int c){
         if(p.color == Color.WHITE)
             whitePossibleMove.get(r).get(c).remove(p);
         else
             blackPossibleMove.get(r).get(c).remove(p);
     }
 
-    public static void processMove(Move m) {
+    public void processMove(Move m) {
         Piece sourcePiece = m.getSourcePiece();
         Piece targetPiece = m.getTargetPiece();
 
@@ -341,7 +356,7 @@ public class BackgroundOverlay {
         return;
     }
 
-    public static void processPawnPromotion(Move m, Piece newPiece){
+    public void processPawnPromotion(Move m, Piece newPiece){
         processMove(m);
         pieceRemotion(m.getSourcePiece(), m.getTargetRow(), m.getTargetColumns());
         pieceInsertion(newPiece, m.getTargetRow(), m.getTargetColumns());
@@ -349,7 +364,7 @@ public class BackgroundOverlay {
     }
 
     //To be executed only after a processMove(m)
-    public static void unprocessMove(Move m){
+    public void unprocessMove(Move m){
         Piece sourcePiece = m.getSourcePiece();
         Piece targetPiece = m.getTargetPiece();
 
@@ -366,7 +381,7 @@ public class BackgroundOverlay {
         return;
     }
 
-    private static void updateTrajectory(Piece ignorePiece, int r, int c) {
+    private void updateTrajectory(Piece ignorePiece, int r, int c) {
         ArrayList<Piece> arr = whitePossibleMove.get(r).get(c);
         int v = 0;
         for(int i = 0; i < arr.size(); i++) {
@@ -391,14 +406,14 @@ public class BackgroundOverlay {
         }
     }
 
-    public static void processEnPassant(Move m, Piece removedPiece) {
+    public void processEnPassant(Move m, Piece removedPiece) {
         pieceRemotion(m.getSourcePiece(), m.getSourceRow(), m.getSourceColumns());
         pieceRemotion(removedPiece, m.getSourceRow(), m.getTargetColumns());
         pieceInsertion(m.getSourcePiece(), m.getTargetRow(), m.getTargetColumns());
         return;
     }
 
-    public static ArrayList<Tile> getPossibleMoves(Piece p) { //Using tiles as markers; the color is not important
+    public ArrayList<Tile> getPossibleMoves(Piece p) { //Using tiles as markers; the color is not important
         ArrayList<Tile> possibleTiles = new ArrayList<Tile>();
         ArrayList<ArrayList<ArrayList<Piece>>> army = p.getColor() == Color.WHITE ? whitePossibleMove : blackPossibleMove;
 

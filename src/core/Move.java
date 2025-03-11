@@ -1,8 +1,9 @@
 package core;
 
 public class Move {
+    private int checkR, checkC;
 
-    static private Board board;
+    private Board board;
 
     private int sourceRow;
     private int sourceColumns;
@@ -32,10 +33,18 @@ public class Move {
         this.sourceColumns = sourceColumns;
         this.targetRow = targetRow;
         this.targetColumns = targetColumns;
-        if(Move.board == null)
-            Move.board = board;
+        this.board = board;
         sourcePiece = board.getPiece(sourceRow, sourceColumns);
         targetPiece = board.getPiece(targetRow, targetColumns);
+        setCheckTile(-1, -1);
+    }
+
+    public Board getBoard() {
+        return board;
+    }
+
+    public void makeCopyOfBoard(){
+        board = new Board(board);
     }
 
     public Piece getSourcePiece() {
@@ -122,7 +131,7 @@ public class Move {
         int ac = king.getPosC();
         int s = rook.getPosC()-king.getPosC() < 0 ? -1 : 1;
         while(ac != ( (king.getPosC() + rook.getPosC()) / 2 ) + (king.getPosC() < rook.getPosC() ? 2 : -2 )){
-            if(BackgroundOverlay.isTileMenaced(king.getPosR(), ac, king.getColor()))
+            if(BackgroundOverlay.getStaticInstance().isTileMenaced(king.getPosR(), ac, king.getColor()))
                 return false;
             ac += s;
         }
@@ -169,5 +178,25 @@ public class Move {
             }
         }
         return false;
+    }
+
+    public int getCheckR() {
+        return checkR;
+    }
+
+    public int getCheckC() {
+        return checkC;
+    }
+
+    public void setCheckTile(int r, int c){
+        checkR = r;
+        checkC = c;
+    }
+
+    @Override
+    public String toString() {
+        return "" +
+                (char)(97+sourceRow) + sourceColumns + " " +
+                (char)(97+targetRow) + targetColumns;
     }
 }
