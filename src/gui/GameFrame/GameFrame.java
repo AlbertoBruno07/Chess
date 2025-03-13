@@ -16,7 +16,7 @@ public class GameFrame extends JFrame {
         bP = new BoardPanel(game, iconManager);
         System.out.println("[BoardPanel] exT = " + (System.nanoTime() - iniT));
         iniT = System.nanoTime();
-        AsideWindow.initializeAsideWindow(bP, game, game.getMovesHistory(), iconManager);
+        AsideWindow.initializeAsideWindow(bP, game, game.getMovesHistory(), iconManager, icon);
 
         System.out.println("[AsideWindow] exT = " + (System.nanoTime() - iniT));
         iniT = System.nanoTime();

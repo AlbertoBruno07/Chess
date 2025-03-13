@@ -15,6 +15,7 @@ public class Game {
     private static int timeFromEnPassantUpdate;
     private BackgroundOverlay backgroundOverlay;
     private MovesHistory mH;
+    private ScoreBoard scoreBoard;
 
     public static Piece getPossibleEnPassant() {
         return possibleEnPassant;
@@ -39,6 +40,7 @@ public class Game {
         backgroundOverlay = BackgroundOverlay.getStaticInstance(board);
         BackgroundOverlay.getStaticInstance().setKing((King)board.getPiece(0, 4), Color.BLACK);
         BackgroundOverlay.getStaticInstance().setKing((King)board.getPiece(7, 4), Color.WHITE);
+        scoreBoard = new ScoreBoard();
     }
 
     private void createArmy(ArrayList<Piece> arrayList, Color color){
@@ -96,6 +98,7 @@ public class Game {
             whiteArmy.remove(piece);
         else
             blackArmy.remove(piece);
+        scoreBoard.pieceHasBeenEaten(piece);
     }
 
     public void addPieceToArmy(Piece piece){

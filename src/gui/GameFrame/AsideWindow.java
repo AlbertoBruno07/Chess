@@ -3,6 +3,7 @@ package gui.GameFrame;
 import core.Game;
 import core.Move;
 import core.MovesHistory;
+import core.PieceType;
 
 import javax.swing.*;
 import java.awt.*;
@@ -48,18 +49,27 @@ public class AsideWindow extends JFrame {
     }
 
     private MoveButton clickedButton;
+    private JLabel whitePoints;
+    private JLabel blackPoints;
 
-    private AsideWindow(){
-        setSize(240, 700);
+    private AsideWindow(IconManager iM){
+        iconManager = iM;
+        setName("Aside Window");
+        setSize(270, 700);
         setDefaultCloseOperation(DISPOSE_ON_CLOSE);
         getContentPane().setBackground(Color.GRAY); //ciao bruno da reby
         getContentPane().setLayout(new BoxLayout(getContentPane(), BoxLayout.Y_AXIS));
-        setResizable(false);
+        setResizable(true);
+
+        JPanel topPanel = new JPanel(new GridLayout());
+        topPanel.setBackground(Color.GRAY);
+        topPanel.setMaximumSize(new Dimension(300, 200));
+        add(topPanel, BorderLayout.PAGE_START);
 
         JLabel label = new JLabel("Move history");
         label.setFont(new Font(label.getFont().getName(), Font.PLAIN,
                 28));
-        add(label, BorderLayout.PAGE_START);
+        topPanel.add(label, BorderLayout.WEST);
 
         panel = new JPanel();
         panel.setBackground(Color.GRAY);
@@ -68,6 +78,11 @@ public class AsideWindow extends JFrame {
         scrollPane = new JScrollPane(panel);
         add(scrollPane);
 
+        JPanel bottomPanel = new JPanel(new GridLayout());
+        bottomPanel.setMaximumSize(new Dimension(300, 200));
+        bottomPanel.setBackground(Color.GRAY);
+        add(bottomPanel, BorderLayout.PAGE_END);
+
         JButton reversBoard = new JButton(IconManager.reverseBoardIcon);
         reversBoard.addActionListener(new ActionListener() {
             @Override
@@ -75,17 +90,31 @@ public class AsideWindow extends JFrame {
                 instance.bP.reverseBoard();
             }
         });
-        add(reversBoard, BorderLayout.PAGE_END);
+        bottomPanel.add(reversBoard, BorderLayout.WEST);
+
+        blackPoints = new JLabel();
+        blackPoints.setFont(new Font(label.getFont().getName(), Font.PLAIN,
+                23));
+        blackPoints.setIcon(iconManager.getSmallIcon(PieceType.KING, core.Color.BLACK));
+        blackPoints.setText("0");
+        bottomPanel.add(blackPoints, BorderLayout.CENTER);
+
+        whitePoints = new JLabel();
+        whitePoints.setFont(new Font(label.getFont().getName(), Font.PLAIN,
+                23));
+        whitePoints.setIcon(iconManager.getSmallIcon(PieceType.KING, core.Color.WHITE));
+        whitePoints.setText("0");
+        bottomPanel.add(whitePoints, BorderLayout.EAST);
 
         setVisible(true);
     }
 
-    public static void initializeAsideWindow(BoardPanel bp, Game game, MovesHistory mH, IconManager iM){
-        instance = new AsideWindow();
+    public static void initializeAsideWindow(BoardPanel bp, Game game, MovesHistory mH, IconManager iM, Image icon){
+        instance = new AsideWindow(iM);
         instance.bP = bp;
         instance.game = game;
         instance.movesHistory = mH;
-        instance.iconManager = iM;
+        instance.setIconImage(icon);
     }
 
     public static AsideWindow getInstance() {
@@ -133,5 +162,12 @@ public class AsideWindow extends JFrame {
         SwingUtilities.invokeLater(() -> instance.scrollPane.getVerticalScrollBar().setValue(instance.scrollPane.getVerticalScrollBar().getMaximum()));
         instance.scrollPane.updateUI();
         instance.moveBtnNumber++;
+    }
+
+    public static void updateScore(core.Color color, int newPoints) {
+        if(color == core.Color.BLACK)
+            instance.blackPoints.setText("" + newPoints);
+        else
+            instance.whitePoints.setText("" + newPoints);
     }
 }

@@ -19,6 +19,7 @@ public class BoardPanel extends JPanel {
     private boolean moveIsOnGoing;
     private ArrayList<Tile> possibleMoves;
     private IconManager iconManager;
+    private Color checkMateColor;
 
     public boolean isReversed;
 
@@ -47,6 +48,7 @@ public class BoardPanel extends JPanel {
         moveIsOnGoing = false;
         iconManager = iM;
         isReversed = false;
+        checkMateColor = null;
         long iniT = System.nanoTime();
         initializeLayout();
         System.out.println("[InitializeLayout] exT = " + (System.nanoTime() - iniT));
@@ -163,6 +165,7 @@ public class BoardPanel extends JPanel {
     }
 
     private void drawCheckMate(Color turn) {
+        checkMateColor = turn;
         int r = BackgroundOverlay.getStaticInstance().getKingR(turn),
                 c = BackgroundOverlay.getStaticInstance().getKingC(turn);
         if(isReversed){
@@ -288,6 +291,8 @@ public class BoardPanel extends JPanel {
 
         initializeGame();
         kingIsInCheck(game.getTurn());
+        if(checkMateColor != null)
+            drawCheckMate(checkMateColor);
     }
 
     public void displayBoard(Board board) {
