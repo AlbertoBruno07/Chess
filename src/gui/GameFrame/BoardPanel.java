@@ -20,6 +20,7 @@ public class BoardPanel extends JPanel {
     private ArrayList<Tile> possibleMoves;
     private IconManager iconManager;
     private Color checkMateColor;
+    private Board boardToBeDisplayed;
 
     public boolean isReversed;
 
@@ -45,6 +46,7 @@ public class BoardPanel extends JPanel {
     public BoardPanel(Game game, IconManager iM) {
         super();
         this.game = game;
+        boardToBeDisplayed = game.getBoard();
         moveIsOnGoing = false;
         iconManager = iM;
         isReversed = false;
@@ -85,7 +87,7 @@ public class BoardPanel extends JPanel {
     private void initializeGame() {
         for(int i = 0; i < Board.getRows(); i++)
             for(int j = 0; j < Board.getColumns(); j++) {
-                Piece piece = game.getBoard().getPiece(i, j);
+                Piece piece = boardToBeDisplayed.getPiece(i, j);
                 if (piece != null)
                     drawPiece(i, j, piece.getType(),
                             piece.getColor());
@@ -97,7 +99,7 @@ public class BoardPanel extends JPanel {
             r = 7-r;
             c = 7-c;
         }
-        return game.getBoard().getTile(r, c).getColor() == Color.WHITE ?
+        return boardToBeDisplayed.getTile(r, c).getColor() == Color.WHITE ?
                 java.awt.Color.WHITE : java.awt.Color.DARK_GRAY;
     }
 
@@ -156,9 +158,11 @@ public class BoardPanel extends JPanel {
             if(BackgroundOverlay.getStaticInstance().checkMate(game.getTurn()))
                 drawCheckMate(game.getTurn());
             Color inverseTurn = game.turn == Color.WHITE ? Color.BLACK : Color.WHITE;
-            tiles[BackgroundOverlay.getStaticInstance().getKingR(inverseTurn)][BackgroundOverlay.getStaticInstance().getKingC(inverseTurn)]
-                    .setBackground(determineTileColor(BackgroundOverlay.getStaticInstance().getKingR(inverseTurn),
-                                    BackgroundOverlay.getStaticInstance().getKingC(inverseTurn)));
+            int kingR = isReversed ? 7-BackgroundOverlay.getStaticInstance().getKingR(inverseTurn) :
+                    BackgroundOverlay.getStaticInstance().getKingR(inverseTurn),
+                kingC = isReversed ? 7-BackgroundOverlay.getStaticInstance().getKingC(inverseTurn) :
+                        BackgroundOverlay.getStaticInstance().getKingC(inverseTurn);
+            tiles[kingR][kingC].setBackground(determineTileColor(kingR, kingC));
             //The king position could have been changed, but this is not a problem since
             //that means it has been moved, so unhighlightSourceTile will clear that tile automatically
         }
@@ -179,9 +183,9 @@ public class BoardPanel extends JPanel {
     }
 
     private void processMove(int sourceRow, int sourceColumn, int targetRow, int targetColumn) {
-        boolean isEating = game.getBoard().getPiece(targetRow, targetColumn) != null;
+        boolean isEating = boardToBeDisplayed.getPiece(targetRow, targetColumn) != null;
         if(game.processMove(sourceRow, sourceColumn, targetRow, targetColumn, this)){
-            Piece tP = game.getBoard().getPiece(targetRow, targetColumn);
+            Piece tP = boardToBeDisplayed.getPiece(targetRow, targetColumn);
             clearPiece(sourceRow, sourceColumn);
             drawPiece(targetRow, targetColumn, tP.getType(), tP.getColor());
             if(isEating)
@@ -236,18 +240,18 @@ public class BoardPanel extends JPanel {
             return;
 
         flushMovePreview();
-        if(game.getBoard().getPiece(r,c) == null)
+        if(boardToBeDisplayed.getPiece(r,c) == null)
             return;
 
-        if(game.getBoard().getPiece(r,c).getColor() != game.getTurn())
+        if(boardToBeDisplayed.getPiece(r,c).getColor() != game.getTurn())
             return;
 
-        possibleMoves = BackgroundOverlay.getStaticInstance().getPossibleMoves(game.getBoard().getPiece(r,c));
+        possibleMoves = BackgroundOverlay.getStaticInstance().getPossibleMoves(boardToBeDisplayed.getPiece(r,c));
 
         for(var i : possibleMoves){
             int pMR = isReversed ?  7-i.getRow() : i.getRow(),
                     pMC = isReversed ? 7-i.getColumn() : i.getColumn();
-            if(game.getBoard().getPiece(i.getRow(), i.getColumn()) != null)
+            if(boardToBeDisplayed.getPiece(i.getRow(), i.getColumn()) != null)
                 highlightMenacedPiece(i.getRow(), i.getColumn());
             else
                 tiles[pMR][pMC].add(new circle(isForMove ? java.awt.Color.GREEN : java.awt.Color.GRAY));
@@ -264,7 +268,7 @@ public class BoardPanel extends JPanel {
             for (var i : possibleMoves){
                 int pMR = isReversed ?  7-i.getRow() : i.getRow(),
                         pMC = isReversed ? 7-i.getColumn() : i.getColumn();
-                if(game.getBoard().getPiece(i.getRow(), i.getColumn()) != null) {
+                if(boardToBeDisplayed.getPiece(i.getRow(), i.getColumn()) != null) {
                     unhighlightSourceTile(i.getRow(), i.getColumn());
                     tiles[pMR][pMC].updateUI();
                     continue;
@@ -296,6 +300,7 @@ public class BoardPanel extends JPanel {
     }
 
     public void displayBoard(Board board) {
+        boardToBeDisplayed = board;
         for(int i = 0; i < Board.getRows(); i++)
             for(int j = 0; j< Board.getColumns(); j++){
                 clearPiece(i, j);

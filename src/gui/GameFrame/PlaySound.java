@@ -11,11 +11,12 @@ import java.net.URL;
 import Settings.Settings;
 
 public class PlaySound {
-    private static PlaySound instance = new PlaySound();
+    private static PlaySound instance;
     private Clip move;
     private Clip capture;
 
     public static void initializePlaySound(){
+        instance = new PlaySound();
 
         String soundPackage = Settings.getSelectedSoundPackage();
 
@@ -48,21 +49,17 @@ public class PlaySound {
     }
 
     public static void playMove(){
-
         SwingUtilities.invokeLater( () -> {
             instance.move.setFramePosition(0);
             instance.move.start();
         });
-
     }
 
     public static void playCapture(){
-
         SwingUtilities.invokeLater( () -> {
             instance.capture.setFramePosition(0);
             instance.capture.start();
         });
-
     }
 
 }

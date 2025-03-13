@@ -7,14 +7,15 @@ import java.util.ArrayList;
 
 public class MovesHistory {
     private static ArrayList<Move> history;
-
-    public MovesHistory() {
+    private Board originalBoard;
+    public MovesHistory(Game game) {
+        originalBoard = game.getBoard();
         history = new ArrayList<Move>();
     }
 
     public Board getMoveBoard(int id){
         if(id == -1)
-            return history.getLast().getBoard();
+            return originalBoard;
         return history.get(id).getBoard();
     }
 

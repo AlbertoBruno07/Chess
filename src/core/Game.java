@@ -34,8 +34,8 @@ public class Game {
         turn = Color.WHITE;
         blackArmy = new ArrayList<>();
         whiteArmy = new ArrayList<>();
-        mH = new MovesHistory();
         board = new Board();
+        mH = new MovesHistory(this);
         setup();
         backgroundOverlay = BackgroundOverlay.getStaticInstance(board);
         BackgroundOverlay.getStaticInstance().setKing((King)board.getPiece(0, 4), Color.BLACK);

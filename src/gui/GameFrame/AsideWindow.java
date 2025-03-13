@@ -159,7 +159,8 @@ public class AsideWindow extends JFrame {
         });
         btn.setAlignmentX(Component.CENTER_ALIGNMENT);
         instance.panel.add(btn);
-        SwingUtilities.invokeLater(() -> instance.scrollPane.getVerticalScrollBar().setValue(instance.scrollPane.getVerticalScrollBar().getMaximum()));
+        SwingUtilities.invokeLater(() -> instance.scrollPane.getVerticalScrollBar()
+                .setValue(instance.scrollPane.getVerticalScrollBar().getMaximum()));
         instance.scrollPane.updateUI();
         instance.moveBtnNumber++;
     }

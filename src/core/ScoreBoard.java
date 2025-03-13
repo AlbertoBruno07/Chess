@@ -29,8 +29,7 @@ public class ScoreBoard {
     private int pointsFromPiece(PieceType type) {
         return switch(type){
             case PAWN -> 1;
-            case KNIGHT -> 3;
-            case BISHOP -> 3;
+            case KNIGHT, BISHOP -> 3;
             case QUEEN -> 9;
             case ROOK -> 5;
             case KING -> 4;

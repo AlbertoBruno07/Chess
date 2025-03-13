@@ -90,7 +90,7 @@ public class StartDialBox {
     private void startNormalGame() {
         if(!SettingsPanel.isOpened()) {
             launchGui(blackIcon, iconManager);
-            mainFrame.dispose();
+            mainFrame.setVisible(false);
         }
     }
 }
