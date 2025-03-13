@@ -20,7 +20,7 @@ public class BoardPanel extends JPanel {
     private ArrayList<Tile> possibleMoves;
     private IconManager iconManager;
 
-    private boolean isReversed;
+    public boolean isReversed;
 
     //Using a class to make easier the detection of the right component
     private class circle extends JPanel{
@@ -66,7 +66,6 @@ public class BoardPanel extends JPanel {
         addMouseListener(listener);
         addMouseMotionListener(listener);
         tiles = new JPanel[Board.getRows()][Board.getColumns()];
-
         for (int i = 0; i < Board.getRows(); i++) {
             for (int j = 0; j < Board.getColumns(); j++) {
                 tiles[i][j] = new JPanel(new GridLayout(1, 1));
@@ -92,24 +91,44 @@ public class BoardPanel extends JPanel {
     }
 
     public java.awt.Color determineTileColor(int r, int c){
+        if(isReversed){
+            r = 7-r;
+            c = 7-c;
+        }
         return game.getBoard().getTile(r, c).getColor() == Color.WHITE ?
                 java.awt.Color.WHITE : java.awt.Color.DARK_GRAY;
     }
 
     public void highlightSourceTile(int r, int c){
+        if(isReversed){
+            r = 7-r;
+            c = 7-c;
+        }
         tiles[r][c].setBackground(java.awt.Color.GREEN);
     }
 
     public void unhighlightSourceTile(int r, int c){
+        if(isReversed){
+            r = 7-r;
+            c = 7-c;
+        }
         tiles[r][c].setBackground(determineTileColor(r, c));
     }
 
     public void clearPiece(int r, int c){
+        if(isReversed){
+            r = 7-r;
+            c = 7-c;
+        }
         tiles[r][c].removeAll();
         tiles[r][c].updateUI();
     }
 
     public void drawPiece(int r, int c, PieceType pT, Color color){
+        if(isReversed){
+            r = 7-r;
+            c = 7-c;
+        }
         tiles[r][c].removeAll();
         tiles[r][c].add(new JLabel(iconManager.getIcon(pT, color)));
         tiles[r][c].updateUI();
@@ -146,6 +165,10 @@ public class BoardPanel extends JPanel {
     private void drawCheckMate(Color turn) {
         int r = BackgroundOverlay.getStaticInstance().getKingR(turn),
                 c = BackgroundOverlay.getStaticInstance().getKingC(turn);
+        if(isReversed){
+            r = 7-r;
+            c = 7-c;
+        }
         clearPiece(r, c);
         tiles[r][c].removeAll();
         tiles[r][c].add(iconManager.getCheckMateLabel(turn));
@@ -183,6 +206,10 @@ public class BoardPanel extends JPanel {
     }
 
     public void highlightKingCheck(int r, int c){
+        if(isReversed){
+            r = 7-r;
+            c = 7-c;
+        }
         tiles[r][c].setBackground(java.awt.Color.RED);
     }
 
@@ -194,6 +221,10 @@ public class BoardPanel extends JPanel {
     }
 
     public void highlightMenacedPiece(int r, int c){
+        if(isReversed){
+            r = 7-r;
+            c = 7-c;
+        }
         tiles[r][c].setBackground(java.awt.Color.GRAY);
     }
 
@@ -211,11 +242,13 @@ public class BoardPanel extends JPanel {
         possibleMoves = BackgroundOverlay.getStaticInstance().getPossibleMoves(game.getBoard().getPiece(r,c));
 
         for(var i : possibleMoves){
+            int pMR = isReversed ?  7-i.getRow() : i.getRow(),
+                    pMC = isReversed ? 7-i.getColumn() : i.getColumn();
             if(game.getBoard().getPiece(i.getRow(), i.getColumn()) != null)
                 highlightMenacedPiece(i.getRow(), i.getColumn());
             else
-                tiles[i.getRow()][i.getColumn()].add(new circle(isForMove ? java.awt.Color.GREEN : java.awt.Color.GRAY));
-            tiles[i.getRow()][i.getColumn()].updateUI();
+                tiles[pMR][pMC].add(new circle(isForMove ? java.awt.Color.GREEN : java.awt.Color.GRAY));
+            tiles[pMR][pMC].updateUI();
         }
     }
 
@@ -226,17 +259,19 @@ public class BoardPanel extends JPanel {
 
         if(possibleMoves != null) {
             for (var i : possibleMoves){
+                int pMR = isReversed ?  7-i.getRow() : i.getRow(),
+                        pMC = isReversed ? 7-i.getColumn() : i.getColumn();
                 if(game.getBoard().getPiece(i.getRow(), i.getColumn()) != null) {
                     unhighlightSourceTile(i.getRow(), i.getColumn());
-                    tiles[i.getRow()][i.getColumn()].updateUI();
+                    tiles[pMR][pMC].updateUI();
                     continue;
                 }
-                for(var c : tiles[i.getRow()][i.getColumn()].getComponents())
+                for(var c : tiles[pMR][pMC].getComponents())
                     if(c instanceof circle) {
-                        tiles[i.getRow()][i.getColumn()].remove(c);
+                        tiles[pMR][pMC].remove(c);
                         break;
                     }
-                tiles[i.getRow()][i.getColumn()].updateUI();
+                tiles[pMR][pMC].updateUI();
             }
             possibleMoves = null;
         }

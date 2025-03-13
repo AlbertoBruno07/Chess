@@ -2,6 +2,7 @@ package gui.StartDialBox;
 
 import Settings.Settings;
 import gui.GameFrame.IconManager;
+import gui.GameFrame.PlaySound;
 
 import javax.swing.*;
 import java.awt.*;
@@ -78,6 +79,9 @@ public class SettingsPanel extends JFrame{
         Settings.setSelectedSoundPackage((String) selectSoundPackage.getSelectedItem());
         Settings.saveToFile();
         startDialBox.updateIconManager(new IconManager());
+        long iniT = System.nanoTime();
+        PlaySound.initializePlaySound();
+        System.out.println("[Playsound] exT = " + (System.nanoTime() - iniT));
         dispose();
     }
 

@@ -65,9 +65,12 @@ public class StartDialBox {
         label.setLocation(20, 15);
         mainFrame.add(label);
 
-        iconManager = new IconManager();
-
         mainFrame.setVisible(true);
+
+        iconManager = new IconManager();
+        long iniT = System.nanoTime();
+        PlaySound.initializePlaySound();
+        System.out.println("[Playsound] exT = " + (System.nanoTime() - iniT));
     }
 
     private void settingsPanel() {
@@ -86,10 +89,6 @@ public class StartDialBox {
 
     private void startNormalGame() {
         if(!SettingsPanel.isOpened()) {
-            long iniT = System.nanoTime();
-            PlaySound.initializePlaySound();
-            System.out.println("[Playsound] exT = " + (System.nanoTime() - iniT));
-            iniT = System.nanoTime();
             launchGui(blackIcon, iconManager);
             mainFrame.dispose();
         }

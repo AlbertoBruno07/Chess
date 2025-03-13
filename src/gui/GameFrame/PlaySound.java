@@ -16,11 +16,16 @@ public class PlaySound {
     private Clip capture;
 
     public static void initializePlaySound(){
+
         String soundPackage = Settings.getSelectedSoundPackage();
 
         try {
+            long inT = System.nanoTime();
             instance.move = AudioSystem.getClip();
+            System.out.println("[getClip - Move] exT: " + (System.nanoTime()-inT));
+            inT = System.nanoTime();
             instance.move.open(AudioSystem.getAudioInputStream(instance.getClass().getClassLoader().getResource("./sounds/"+soundPackage+"/Move.wav")));
+            System.out.println("[open - Move] exT: " + (System.nanoTime()-inT));
         } catch (UnsupportedAudioFileException e) {
             System.out.println("[Sound] Unsupported audio file for Move");
         } catch (IOException e) {
