@@ -66,9 +66,9 @@ public class BoardPanel extends JPanel {
                 Board.getColumns());
         setPreferredSize(new Dimension(800, 800));
         add(main, BorderLayout.CENTER);
-        listener = new GameDynamicsListener(this);
-        addMouseListener(listener);
-        addMouseMotionListener(listener);
+        //listener = new GameDynamicsListener(this);
+        //addMouseListener(listener);
+        //addMouseMotionListener(listener);
         tiles = new JPanel[Board.getRows()][Board.getColumns()];
         for (int i = 0; i < Board.getRows(); i++) {
             for (int j = 0; j < Board.getColumns(); j++) {
@@ -79,6 +79,8 @@ public class BoardPanel extends JPanel {
                         TILE_DIMENSION));
                 tiles[i][j].setBackground(determineTileColor(i, j));
                 tiles[i][j].setVisible(true);
+                tiles[i][j].addMouseListener(new GameDynamicsListener(this, i, j));
+                tiles[i][j].addMouseMotionListener(new GameDynamicsListener(this, i, j));
                 main.add(tiles[i][j]);
             }
         }
@@ -239,7 +241,7 @@ public class BoardPanel extends JPanel {
         if(moveIsOnGoing)
             return;
 
-        flushMovePreview();
+        if(isForMove) flushMovePreview();
         if(boardToBeDisplayed.getPiece(r,c) == null)
             return;
 

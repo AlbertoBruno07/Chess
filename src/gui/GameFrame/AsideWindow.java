@@ -54,7 +54,7 @@ public class AsideWindow extends JFrame {
 
     private AsideWindow(IconManager iM){
         iconManager = iM;
-        setName("Aside Window");
+        setTitle("Aside Window");
         setSize(270, 700);
         setDefaultCloseOperation(DISPOSE_ON_CLOSE);
         getContentPane().setBackground(Color.GRAY); //ciao bruno da reby

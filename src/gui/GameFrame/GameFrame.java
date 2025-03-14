@@ -22,10 +22,13 @@ public class GameFrame extends JFrame {
         iniT = System.nanoTime();
         setTitle("JavaChess");
         setIconImage(icon);
-        setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         add(bP);
         setResizable(false);
         pack();
+    }
+
+    public void setVisible(){
         setVisible(true);
     }
 

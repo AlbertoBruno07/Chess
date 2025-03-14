@@ -1,6 +1,8 @@
 package gui.StartDialBox;
 
 import Settings.Settings;
+import gui.GameFrame.BoardPanel;
+import gui.GameFrame.GameFrame;
 import gui.GameFrame.IconManager;
 import gui.GameFrame.PlaySound;
 
@@ -8,10 +10,19 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.util.concurrent.ExecutionException;
 
 import static gui.GameFrame.GuiLauncher.launchGui;
 
 public class StartDialBox {
+
+    private SwingWorker<Void, Void> backgroundWorker = new SwingWorker<Void, Void>() {
+        @Override
+        protected Void doInBackground() throws Exception {
+            gameFrame = new GameFrame(blackIcon, iconManager);
+            return null;
+        }
+    };
 
     private JFrame mainFrame;
     private Image blackIcon;
@@ -19,6 +30,7 @@ public class StartDialBox {
     private Image settingsGearIcon;
 
     private static IconManager iconManager;
+    private GameFrame gameFrame;
 
     public StartDialBox() {
 
@@ -68,6 +80,9 @@ public class StartDialBox {
         mainFrame.setVisible(true);
 
         iconManager = new IconManager();
+
+        backgroundWorker.execute();
+
         long iniT = System.nanoTime();
         PlaySound.initializePlaySound();
         System.out.println("[Playsound] exT = " + (System.nanoTime() - iniT));
@@ -89,7 +104,16 @@ public class StartDialBox {
 
     private void startNormalGame() {
         if(!SettingsPanel.isOpened()) {
-            launchGui(blackIcon, iconManager);
+            //launchGui(blackIcon, iconManager);
+            try {
+                backgroundWorker.get();
+            } catch (InterruptedException e) {
+                System.out.println(e);
+            } catch (ExecutionException e) {
+                System.out.println(e);
+            }
+
+            gameFrame.setVisible();
             mainFrame.setVisible(false);
         }
     }

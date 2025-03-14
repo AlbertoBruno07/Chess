@@ -7,6 +7,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.net.URL;
+import java.util.concurrent.ExecutionException;
 
 import Settings.Settings;
 
@@ -15,51 +16,82 @@ public class PlaySound {
     private Clip move;
     private Clip capture;
 
+    private SwingWorker initialisationWorker;
+
     public static void initializePlaySound(){
         instance = new PlaySound();
 
-        String soundPackage = Settings.getSelectedSoundPackage();
+        instance.initialisationWorker = new SwingWorker<Void, Void>(){
+            @Override
+            protected Void doInBackground() throws Exception {
+                String soundPackage = Settings.getSelectedSoundPackage();
 
-        try {
-            long inT = System.nanoTime();
-            instance.move = AudioSystem.getClip();
-            System.out.println("[getClip - Move] exT: " + (System.nanoTime()-inT));
-            inT = System.nanoTime();
-            instance.move.open(AudioSystem.getAudioInputStream(instance.getClass().getClassLoader().getResource("./sounds/"+soundPackage+"/Move.wav")));
-            System.out.println("[open - Move] exT: " + (System.nanoTime()-inT));
-        } catch (UnsupportedAudioFileException e) {
-            System.out.println("[Sound] Unsupported audio file for Move");
-        } catch (IOException e) {
-            System.out.println("[Sound] Cannot read audio file for Move");
-        } catch (LineUnavailableException e) {
-            System.out.println("[Sound] Cannot open audio clip");
-        }
+                try {
+                    long inT = System.nanoTime();
+                    instance.move = AudioSystem.getClip();
+                    System.out.println("[getClip - Move] exT: " + (System.nanoTime() - inT));
+                    inT = System.nanoTime();
+                    instance.move.open(AudioSystem.getAudioInputStream(instance.getClass().getClassLoader().getResource("./sounds/" + soundPackage + "/Move.wav")));
+                    System.out.println("[open - Move] exT: " + (System.nanoTime() - inT));
+                } catch (UnsupportedAudioFileException e) {
+                    System.out.println("[Sound] Unsupported audio file for Move");
+                } catch (IOException e) {
+                    System.out.println("[Sound] Cannot read audio file for Move");
+                } catch (LineUnavailableException e) {
+                    System.out.println("[Sound] Cannot open audio clip");
+                }
 
-        try {
-            instance.capture = AudioSystem.getClip();
-            instance.capture.open(AudioSystem.getAudioInputStream((instance.getClass().getClassLoader().getResource("./sounds/"+soundPackage+"/Capture.wav"))));
-        } catch (UnsupportedAudioFileException e) {
-            System.out.println("[Sound] Unsupported audio file for Capture");
-        } catch (IOException e) {
-            System.out.println("[Sound] Cannot read audio file for Capture");
-        }catch (LineUnavailableException e) {
-            System.out.println("[Sound] Cannot open audio clip");
-        }
+                try {
+                    instance.capture = AudioSystem.getClip();
+                    instance.capture.open(AudioSystem.getAudioInputStream((instance.getClass().getClassLoader().getResource("./sounds/" + soundPackage + "/Capture.wav"))));
+                } catch (UnsupportedAudioFileException e) {
+                    System.out.println("[Sound] Unsupported audio file for Capture");
+                } catch (IOException e) {
+                    System.out.println("[Sound] Cannot read audio file for Capture");
+                } catch (LineUnavailableException e) {
+                    System.out.println("[Sound] Cannot open audio clip");
+                }
+                return null;
+            }
+        };
 
+        instance.initialisationWorker.execute();
+    }
+
+    private static Thread makeCaptureWorker() {
+        return new Thread(() ->{
+            instance.capture.setFramePosition(0);
+            instance.capture.start();
+            Thread.currentThread().interrupt();
+        });
+    }
+
+    private static Thread makeMoveWorker() {
+        return new Thread(() -> {
+            instance.move.setFramePosition(0);
+            instance.move.start();
+            Thread.currentThread().interrupt();
+        });
     }
 
     public static void playMove(){
-        SwingUtilities.invokeLater( () -> {
-            instance.move.setFramePosition(0);
-            instance.move.start();
-        });
+        waitForInitialization();
+        makeMoveWorker().start();
     }
 
     public static void playCapture(){
-        SwingUtilities.invokeLater( () -> {
-            instance.capture.setFramePosition(0);
-            instance.capture.start();
-        });
+        waitForInitialization();
+        makeCaptureWorker().start();
+    }
+
+    private static void waitForInitialization() {
+        try {
+            instance.initialisationWorker.get();
+        } catch (InterruptedException e) {
+            System.out.println(e);
+        } catch (ExecutionException e) {
+            System.out.println(e);
+        }
     }
 
 }
