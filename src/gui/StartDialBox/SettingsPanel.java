@@ -82,6 +82,7 @@ public class SettingsPanel extends JFrame{
         long iniT = System.nanoTime();
         PlaySound.initializePlaySound();
         System.out.println("[Playsound] exT = " + (System.nanoTime() - iniT));
+        startDialBox.makeGameFrame();
         dispose();
     }
 

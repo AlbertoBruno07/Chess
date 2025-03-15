@@ -58,7 +58,7 @@ public class GameDynamicsListener implements MouseListener, MouseMotionListener 
             int R = r, C = c;
             if(bP.isReversed){
                 R = 7-r;
-                R = 7-c;
+                C = 7-c;
             }
             bP.movePreview(R, C, false);
         }

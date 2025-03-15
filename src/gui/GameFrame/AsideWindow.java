@@ -105,11 +105,12 @@ public class AsideWindow extends JFrame {
         whitePoints.setIcon(iconManager.getSmallIcon(PieceType.KING, core.Color.WHITE));
         whitePoints.setText("0");
         bottomPanel.add(whitePoints, BorderLayout.EAST);
-
-        setVisible(true);
     }
 
     public static void initializeAsideWindow(BoardPanel bp, Game game, MovesHistory mH, IconManager iM, Image icon){
+        if(instance != null)
+            instance.dispose();
+
         instance = new AsideWindow(iM);
         instance.bP = bp;
         instance.game = game;
@@ -119,6 +120,10 @@ public class AsideWindow extends JFrame {
 
     public static AsideWindow getInstance() {
         return instance;
+    }
+
+    public static void makeVisible(){
+        instance.setVisible(true);
     }
 
     public static void addAnElement(Move m){
@@ -132,12 +137,17 @@ public class AsideWindow extends JFrame {
             @Override
             public void actionPerformed(ActionEvent e) {
                 SwingUtilities.invokeLater(() -> {
+
                     if (instance.clickedButton != null)
                         if(instance.clickedButton != thisButton)
                             instance.clickedButton.reset();
 
                     instance.clickedButton = thisButton;
                     if (!thisButton.state) {
+                        updateScore(core.Color.BLACK, instance.movesHistory.
+                                getMoveScoreBlack(thisButton.id));
+                        updateScore(core.Color.WHITE, instance.movesHistory.
+                                getMoveScoreWhite(thisButton.id));
                         thisButton.clicked();
                         isOnPreviewsBoard = true;
                         instance.bP.displayBoard(instance.movesHistory.getMoveBoard(thisButton.id));
@@ -146,6 +156,10 @@ public class AsideWindow extends JFrame {
                                     instance.movesHistory.getMoveCheckC(thisButton.id));
                     }
                     else {
+                        updateScore(core.Color.BLACK, instance.movesHistory.
+                                getMoveScoreBlack(-1));
+                        updateScore(core.Color.WHITE, instance.movesHistory.
+                                getMoveScoreWhite(-1));
                         instance.clickedButton = null;
                         thisButton.reset();
                         isOnPreviewsBoard = false;

@@ -35,4 +35,12 @@ public class ScoreBoard {
             case KING -> 4;
         };
     }
+
+    public int getBlackPoints() {
+        return blackPoints;
+    }
+
+    public int getWhitePoints() {
+        return whitePoints;
+    }
 }

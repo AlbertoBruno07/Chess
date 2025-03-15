@@ -23,12 +23,13 @@ public class IconManager {
     public static ImageIcon reverseBoardIcon;
 
     public IconManager() {
-        iconPackage = Settings.getSelectedIconPackage();
         icons = new ImageIcon[12];
+        iconPackage = Settings.getSelectedIconPackage();
         loadIcons();
     }
 
-    private void loadIcons() {
+    public void loadIcons() {
+
         reverseBoardIcon = new ImageIcon((new ImageIcon(
                 IconManager.class.getClassLoader().getResource("./icons/General/ReverseBoard.png"))).
                 getImage().getScaledInstance(30, 30, Image.SCALE_SMOOTH));

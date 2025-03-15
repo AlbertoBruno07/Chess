@@ -7,8 +7,11 @@ import java.util.ArrayList;
 
 public class MovesHistory {
     private static ArrayList<Move> history;
-    private Board originalBoard;
+    private static Board originalBoard;
+    private static Game game;
+
     public MovesHistory(Game game) {
+        this.game = game;
         originalBoard = game.getBoard();
         history = new ArrayList<Move>();
     }
@@ -21,6 +24,8 @@ public class MovesHistory {
 
     public void insertAMove(Move m){
         m.makeCopyOfBoard();
+        m.setScoreBlack(game.getScoreBoard().getBlackPoints());
+        m.setScoreWhite(game.getScoreBoard().getWhitePoints());
         history.add(m);
         AsideWindow.addAnElement(m);
     }
@@ -38,5 +43,15 @@ public class MovesHistory {
         if(id == -1)
             return history.getLast().getCheckC();
         return history.get(id).getCheckC();
+    }
+    public int getMoveScoreBlack(int id){
+        if(id == -1)
+            return game.getScoreBoard().getBlackPoints();
+        return history.get(id).getScoreBlack();
+    }
+    public int getMoveScoreWhite(int id){
+        if(id == -1)
+            return game.getScoreBoard().getWhitePoints();
+        return history.get(id).getScoreWhite();
     }
 }

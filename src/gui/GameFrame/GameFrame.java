@@ -5,7 +5,7 @@ import javax.swing.*;
 import java.awt.*;
 
 public class GameFrame extends JFrame {
-    private BoardPanel bP;
+    public BoardPanel bP;
     private core.Game game;
 
     public GameFrame(Image icon, IconManager iconManager){
@@ -28,7 +28,8 @@ public class GameFrame extends JFrame {
         pack();
     }
 
-    public void setVisible(){
+    public void makeVisible(){
+        AsideWindow.makeVisible();
         setVisible(true);
     }
 

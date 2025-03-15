@@ -9,6 +9,7 @@ public class Move {
     private int sourceColumns;
     private int targetRow;
     private int targetColumns;
+    private int scoreBlack, scoreWhite;
 
     Piece sourcePiece, targetPiece;
 
@@ -37,6 +38,22 @@ public class Move {
         sourcePiece = board.getPiece(sourceRow, sourceColumns);
         targetPiece = board.getPiece(targetRow, targetColumns);
         setCheckTile(-1, -1);
+    }
+
+    public int getScoreBlack() {
+        return scoreBlack;
+    }
+
+    public void setScoreBlack(int scoreBlack) {
+        this.scoreBlack = scoreBlack;
+    }
+
+    public int getScoreWhite() {
+        return scoreWhite;
+    }
+
+    public void setScoreWhite(int scoreWhite) {
+        this.scoreWhite = scoreWhite;
     }
 
     public Board getBoard() {

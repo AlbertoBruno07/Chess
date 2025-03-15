@@ -86,7 +86,7 @@ public class BoardPanel extends JPanel {
         }
     }
 
-    private void initializeGame() {
+    public void initializeGame() {
         for(int i = 0; i < Board.getRows(); i++)
             for(int j = 0; j < Board.getColumns(); j++) {
                 Piece piece = boardToBeDisplayed.getPiece(i, j);
@@ -296,7 +296,8 @@ public class BoardPanel extends JPanel {
             }
 
         initializeGame();
-        kingIsInCheck(game.getTurn());
+        kingIsInCheck(Color.BLACK);
+        kingIsInCheck(Color.WHITE);
         if(checkMateColor != null)
             drawCheckMate(checkMateColor);
     }

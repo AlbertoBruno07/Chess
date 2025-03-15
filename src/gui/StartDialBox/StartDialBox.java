@@ -1,7 +1,6 @@
 package gui.StartDialBox;
 
 import Settings.Settings;
-import gui.GameFrame.BoardPanel;
 import gui.GameFrame.GameFrame;
 import gui.GameFrame.IconManager;
 import gui.GameFrame.PlaySound;
@@ -12,8 +11,6 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.concurrent.ExecutionException;
 
-import static gui.GameFrame.GuiLauncher.launchGui;
-
 public class StartDialBox {
 
     private SwingWorker<Void, Void> backgroundWorker = new SwingWorker<Void, Void>() {
@@ -23,6 +20,8 @@ public class StartDialBox {
             return null;
         }
     };
+
+    Thread futureGameFrameMaker;
 
     private JFrame mainFrame;
     private Image blackIcon;
@@ -88,7 +87,38 @@ public class StartDialBox {
         System.out.println("[Playsound] exT = " + (System.nanoTime() - iniT));
     }
 
+    public void makeGameFrame(){
+        if(gameFrame != null)
+            gameFrame.dispose();
+        futureGameFrameMaker = new Thread(() -> gameFrame = new GameFrame(blackIcon, iconManager));
+        futureGameFrameMaker.start();
+    }
+
+    public GameFrame getGameFrame() {
+        return gameFrame;
+    }
+
+    public static IconManager getIconManager() {
+        return iconManager;
+    }
+
     private void settingsPanel() {
+        try {
+            backgroundWorker.get();
+        } catch (InterruptedException e) {
+            System.out.println(e);
+        } catch (ExecutionException e) {
+            System.out.println(e);
+        }
+
+        if(futureGameFrameMaker != null) {
+            try {
+                futureGameFrameMaker.join();
+            } catch (InterruptedException e) {
+                System.out.println(e);
+            }
+        }
+
         SettingsPanel p = SettingsPanel.getInstance(blackIcon, this);
     }
 
@@ -113,7 +143,15 @@ public class StartDialBox {
                 System.out.println(e);
             }
 
-            gameFrame.setVisible();
+            if(futureGameFrameMaker != null) {
+                try {
+                    futureGameFrameMaker.join();
+                } catch (InterruptedException e) {
+                    System.out.println(e);
+                }
+            }
+
+            gameFrame.makeVisible();
             mainFrame.setVisible(false);
         }
     }

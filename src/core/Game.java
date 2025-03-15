@@ -93,6 +93,10 @@ public class Game {
         return board;
     }
 
+    public ScoreBoard getScoreBoard() {
+        return scoreBoard;
+    }
+
     public void removePieceFromArmy(Piece piece){
         if(piece.color == Color.WHITE)
             whiteArmy.remove(piece);
