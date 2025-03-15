@@ -150,10 +150,9 @@ public class AsideWindow extends JFrame {
                                 getMoveScoreWhite(thisButton.id));
                         thisButton.clicked();
                         isOnPreviewsBoard = true;
+                        instance.bP.setCheckCoords(instance.movesHistory.getMoveCheckR(thisButton.id),
+                                instance.movesHistory.getMoveCheckC(thisButton.id));
                         instance.bP.displayBoard(instance.movesHistory.getMoveBoard(thisButton.id));
-                        if(instance.movesHistory.getMoveCheckR(thisButton.id) != -1)
-                            instance.bP.highlightKingCheck(instance.movesHistory.getMoveCheckR(thisButton.id),
-                                    instance.movesHistory.getMoveCheckC(thisButton.id));
                     }
                     else {
                         updateScore(core.Color.BLACK, instance.movesHistory.
@@ -163,10 +162,9 @@ public class AsideWindow extends JFrame {
                         instance.clickedButton = null;
                         thisButton.reset();
                         isOnPreviewsBoard = false;
+                        instance.bP.setCheckCoords(instance.movesHistory.getMoveCheckR(-1),
+                                instance.movesHistory.getMoveCheckC(-1));
                         instance.bP.displayBoard(instance.movesHistory.getMoveBoard(-1));
-                        if(instance.movesHistory.getMoveCheckR(-1) != -1)
-                            instance.bP.highlightKingCheck(instance.movesHistory.getMoveCheckR(-1),
-                                    instance.movesHistory.getMoveCheckC(-1));
                     }
                 });
             }

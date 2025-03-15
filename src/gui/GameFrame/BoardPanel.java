@@ -21,6 +21,7 @@ public class BoardPanel extends JPanel {
     private IconManager iconManager;
     private Color checkMateColor;
     private Board boardToBeDisplayed;
+    private int checkR, checkC;
 
     public boolean isReversed;
 
@@ -51,6 +52,8 @@ public class BoardPanel extends JPanel {
         iconManager = iM;
         isReversed = false;
         checkMateColor = null;
+        checkC = -1;
+        checkR = -1;
         long iniT = System.nanoTime();
         initializeLayout();
         System.out.println("[InitializeLayout] exT = " + (System.nanoTime() - iniT));
@@ -211,6 +214,8 @@ public class BoardPanel extends JPanel {
                     BackgroundOverlay.getStaticInstance().getKingC(c));
             MovesHistory.setCheckOnLastMove(BackgroundOverlay.getStaticInstance().getKingR(c),
                     BackgroundOverlay.getStaticInstance().getKingC(c));
+            setCheckCoords(BackgroundOverlay.getStaticInstance().getKingR(c),
+                    BackgroundOverlay.getStaticInstance().getKingC(c));
         }
     }
 
@@ -296,10 +301,17 @@ public class BoardPanel extends JPanel {
             }
 
         initializeGame();
-        kingIsInCheck(Color.BLACK);
-        kingIsInCheck(Color.WHITE);
+        //kingIsInCheck(Color.BLACK);
+        //kingIsInCheck(Color.WHITE);
+        if(checkC != -1)
+            highlightKingCheck(checkR, checkC);
         if(checkMateColor != null)
             drawCheckMate(checkMateColor);
+    }
+
+    public void setCheckCoords(int r, int c){
+        checkC = c;
+        checkR = r;
     }
 
     public void displayBoard(Board board) {
@@ -312,5 +324,7 @@ public class BoardPanel extends JPanel {
                 if(p != null)
                     drawPiece(i, j, p.getType(), p.getColor());
             }
+        if(checkC != -1)
+            highlightKingCheck(checkR, checkC);
     }
 }
