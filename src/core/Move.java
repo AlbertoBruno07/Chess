@@ -10,6 +10,7 @@ public class Move {
     private int targetRow;
     private int targetColumns;
     private int scoreBlack, scoreWhite;
+    private String promotedPieceType;
 
     Piece sourcePiece, targetPiece;
 
@@ -208,6 +209,14 @@ public class Move {
     public void setCheckTile(int r, int c){
         checkR = r;
         checkC = c;
+    }
+
+    public String getPromotedPieceType() {
+        return promotedPieceType;
+    }
+
+    public void setPromotedPieceType(String promotedPieceType) {
+        this.promotedPieceType = promotedPieceType;
     }
 
     @Override

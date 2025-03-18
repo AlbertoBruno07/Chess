@@ -1,6 +1,7 @@
 package gui.StartDialBox;
 
 import Settings.Settings;
+import core.OnlineComunicationManager;
 import gui.GameFrame.GameFrame;
 import gui.GameFrame.IconManager;
 import gui.GameFrame.PlaySound;
@@ -10,6 +11,7 @@ import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Semaphore;
 
 public class StartDialBox {
 
@@ -30,6 +32,7 @@ public class StartDialBox {
 
     private static IconManager iconManager;
     private GameFrame gameFrame;
+    private JFrame popup;
 
     public StartDialBox() {
 
@@ -41,7 +44,7 @@ public class StartDialBox {
         mainFrame.setSize(600, 300);
         mainFrame.setLayout(null);
         mainFrame.setResizable(false);
-        mainFrame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+        mainFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
         mainFrame.getContentPane().setBackground(Color.BLACK);
 
@@ -58,6 +61,7 @@ public class StartDialBox {
         });
         mainFrame.add(startNormalGame);
 
+        //Settings
         JButton settings = new JButton(new ImageIcon(settingsGearIcon.getScaledInstance(20,20, Image.SCALE_SMOOTH)));
         settings.setBorderPainted(false);
         settings.setFocusPainted(false);
@@ -69,6 +73,19 @@ public class StartDialBox {
             }
         });
         mainFrame.add(settings);
+
+        //Online Game
+        JButton startOnlineGame = new JButton("Online Game");
+        startOnlineGame.setBorderPainted(false);
+        startOnlineGame.setFocusPainted(false);
+        startOnlineGame.setBounds(360, 100, 130, 40);
+        startOnlineGame.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                startOnlineGame();
+            }
+        });
+        mainFrame.add(startOnlineGame);
 
         //Image
         JLabel label = new JLabel(new ImageIcon(whiteIcon.getScaledInstance(230, 230, Image.SCALE_SMOOTH)));
@@ -82,9 +99,112 @@ public class StartDialBox {
 
         backgroundWorker.execute();
 
-        long iniT = System.nanoTime();
+        //long iniT = System.nanoTime();
         PlaySound.initializePlaySound();
-        System.out.println("[Playsound] exT = " + (System.nanoTime() - iniT));
+        //System.out.println("[Playsound] exT = " + (System.nanoTime() - iniT));
+    }
+
+    private void startOnlineGame() {
+        popup = new JFrame();
+        popup.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
+        popup.setSize(330, 150);
+        JPanel panel = new JPanel(null);
+        JLabel msg = new JLabel("You are the WHITE. Waiting for the opponent.");
+        popup.setTitle("Joshua");
+        popup.setIconImage(blackIcon);
+        msg.setForeground(Color.WHITE);
+        msg.setSize(320, 50);
+        msg.setLocation(30, 30);
+        panel.setBackground(Color.BLACK);
+        panel.add(msg);
+        popup.add(panel);
+
+        JFrame onlineSettings = new JFrame();
+        onlineSettings.setSize(350, 320);
+        onlineSettings.setTitle("Online Settings");
+        onlineSettings.setIconImage(blackIcon);
+        onlineSettings.setResizable(false);
+        onlineSettings.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
+
+        JPanel requests = new JPanel(null);
+        requests.setBackground(Color.BLACK);
+
+        onlineSettings.add(requests);
+
+        JTextField URL = new JTextField("localhost");
+        URL.setSize(150, 25);
+        URL.setLocation(135, 30);
+        JLabel urlL = new JLabel("URL");
+        urlL.setLocation(65,20);
+        urlL.setSize(100, 50);
+        urlL.setForeground(Color.WHITE);
+        requests.add(urlL);
+        requests.add(URL);
+
+        JTextField port = new JTextField("500");
+        port.setSize(150, 25);
+        port.setLocation(135, 85);
+        JLabel portL = new JLabel("Port");
+        portL.setLocation(65,75);
+        portL.setSize(100, 50);
+        portL.setForeground(Color.WHITE);
+        requests.add(port);
+        requests.add(portL);
+
+        JTextField game = new JTextField();
+        game.setSize(150, 25);
+        game.setLocation(135, 140);
+        JLabel gameL = new JLabel("Game");
+        gameL.setLocation(65,130);
+        gameL.setSize(100, 50);
+        gameL.setForeground(Color.WHITE);
+        requests.add(game);
+        requests.add(gameL);
+        
+        JButton ok = new JButton("OK");
+        ok.setLocation(250, 240);
+        ok.setSize(70,30);
+        ok.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                String urlV = URL.getText();
+                int portV = Integer.parseInt(port.getText());
+                int gameV = Integer.parseInt(game.getText());
+
+                OnlineComunicationManager commManager =
+                        new OnlineComunicationManager(urlV, portV, gameV);
+                int resOfCreation = commManager.makeSocket();
+                switch (resOfCreation){
+                    case -1 :
+                        JOptionPane.showMessageDialog(null, "Problem in connection");
+                        break;
+                    case 2:
+                        JOptionPane.showMessageDialog(null, "Game does not exist");
+                        commManager.closeSocket();
+                        break;
+                    case 100:
+                        JOptionPane.showMessageDialog(null, "Game is full");
+                        commManager.closeSocket();
+                        break;
+                    case 0, 1:
+                        popup.setVisible(true);
+                        mainFrame.setVisible(false);
+                        new Thread( () -> {
+                            commManager.getStart();
+                            gameFrame.makeOnlineGame(resOfCreation, commManager);
+                            popup.dispose();
+                            startNormalGame();
+                        }).start();
+                        break;
+                    default:
+                        break;
+                }
+                onlineSettings.dispose();
+            }
+        });
+        requests.add(ok);
+
+        onlineSettings.setVisible(true);
     }
 
     public void makeGameFrame(){
@@ -102,7 +222,7 @@ public class StartDialBox {
         return iconManager;
     }
 
-    private void settingsPanel() {
+    private void waitForGame(){
         try {
             backgroundWorker.get();
         } catch (InterruptedException e) {
@@ -118,6 +238,10 @@ public class StartDialBox {
                 System.out.println(e);
             }
         }
+    }
+
+    private void settingsPanel() {
+        waitForGame();
 
         SettingsPanel p = SettingsPanel.getInstance(blackIcon, this);
     }

@@ -146,6 +146,8 @@ public class BoardPanel extends JPanel {
 
 
     public void onMove(int r, int c){
+        if(!game.isYourTurn())
+            return;
         if(!moveIsOnGoing){
             if(game.isMoveSourceValid(r, c)){
                 movePreview(r, c, true);
@@ -188,6 +190,8 @@ public class BoardPanel extends JPanel {
     }
 
     private void processMove(int sourceRow, int sourceColumn, int targetRow, int targetColumn) {
+        if(!game.isYourTurn())
+            return;
         boolean isEating = boardToBeDisplayed.getPiece(targetRow, targetColumn) != null;
         if(game.processMove(sourceRow, sourceColumn, targetRow, targetColumn, this)){
             Piece tP = boardToBeDisplayed.getPiece(targetRow, targetColumn);
@@ -197,7 +201,51 @@ public class BoardPanel extends JPanel {
                 PlaySound.playCapture();
             else
                 PlaySound.playMove();
+            processMoveEnd();
         }
+    }
+
+    public void processMoveEnd(){
+        if(game.isAnOnlineGame()) {
+            game.setYourTurn(false);
+        }
+        setCheckCoords(-1, -1);
+    }
+
+    public void processOnlineOpponentMove(Move move){
+        if(game.isYourTurn()) //Shouldn't happen, but better safe than sorry
+            return;
+
+        int sourceRow = move.getSourceRow(),
+                sourceColumn = move.getSourceColumns(),
+                targetRow = move.getTargetRow(),
+                targetColumn = move.getTargetColumns();
+
+        boolean isEating = boardToBeDisplayed.getPiece(targetRow, targetColumn) != null;
+        if(game.processMove(sourceRow, sourceColumn, targetRow, targetColumn, this)) {
+            Piece tP = boardToBeDisplayed.getPiece(targetRow, targetColumn);
+            clearPiece(sourceRow, sourceColumn);
+            drawPiece(targetRow, targetColumn, tP.getType(), tP.getColor());
+            if (isEating)
+                PlaySound.playCapture();
+            else
+                PlaySound.playMove();
+        }
+
+        if(checkR != -1){
+            unhighlightSourceTile(checkR, checkC);
+            setCheckCoords(-1, -1);
+        }
+
+        kingIsInCheck(Color.BLACK);
+        kingIsInCheck(Color.WHITE);
+
+        if(BackgroundOverlay.getStaticInstance().checkMate(Color.BLACK))
+            drawCheckMate(Color.BLACK);
+        if(BackgroundOverlay.getStaticInstance().checkMate(Color.WHITE))
+            drawCheckMate(Color.WHITE);
+
+        game.setYourTurn(true);
     }
 
     public void processCastling(int r, int kSC, int kTC, int rSC, int rTC){
@@ -250,7 +298,8 @@ public class BoardPanel extends JPanel {
         if(boardToBeDisplayed.getPiece(r,c) == null)
             return;
 
-        if(boardToBeDisplayed.getPiece(r,c).getColor() != game.getTurn())
+        if(boardToBeDisplayed.getPiece(r,c).getColor() != game.getTurn() || (
+        boardToBeDisplayed.getPiece(r, c).getColor() != game.getPlayer() && game.isAnOnlineGame()))
             return;
 
         possibleMoves = BackgroundOverlay.getStaticInstance().getPossibleMoves(boardToBeDisplayed.getPiece(r,c));
@@ -303,7 +352,7 @@ public class BoardPanel extends JPanel {
         initializeGame();
         //kingIsInCheck(Color.BLACK);
         //kingIsInCheck(Color.WHITE);
-        if(checkC != -1)
+        if(checkR != -1)
             highlightKingCheck(checkR, checkC);
         if(checkMateColor != null)
             drawCheckMate(checkMateColor);

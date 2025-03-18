@@ -17,6 +17,12 @@ public class Game {
     private MovesHistory mH;
     private ScoreBoard scoreBoard;
 
+    //For online
+    private boolean isAnOnlineGame;
+    private Color player;
+    private OnlineComunicationManager comunicationManager;
+    private boolean isYourTurn;
+
     public static Piece getPossibleEnPassant() {
         return possibleEnPassant;
     }
@@ -32,6 +38,8 @@ public class Game {
 
     public Game() {
         turn = Color.WHITE;
+        isAnOnlineGame = false;
+        isYourTurn = true;
         blackArmy = new ArrayList<>();
         whiteArmy = new ArrayList<>();
         board = new Board();
@@ -136,7 +144,9 @@ public class Game {
             manageCastling(move, bp);
             switchTurn();
             mH.insertAMove(move);
-
+            if(isAnOnlineGame && isYourTurn)
+                comunicationManager.sendMove(move);
+            bp.processMoveEnd();
             return false; //Do not wanna render normally, let BoardPanel believe the move is invalid
         }
 
@@ -144,12 +154,17 @@ public class Game {
             managePawnPromotion(move, bp);
             switchTurn();
             mH.insertAMove(move);
+            if(isAnOnlineGame && isYourTurn)
+                comunicationManager.sendMove(move);
             return true; //Wanna render normally
         }
 
         if(move.isEnPassant()){
             manageEnPassant(move, bp);
             mH.insertAMove(move);
+            if(isAnOnlineGame && isYourTurn)
+                comunicationManager.sendMove(move);
+            bp.processMoveEnd();
             return false; //Do not wanna render normally, let BoardPanel believe the move is invalid
         }
 
@@ -173,6 +188,8 @@ public class Game {
             if(board.getPiece(tR, tC).type == PieceType.PAWN)
                 ((Pawn)board.getPiece(tR, tC)).updateFM();
             mH.insertAMove(move);
+            if(isAnOnlineGame && isYourTurn)
+                comunicationManager.sendMove(move);
             return true;
         } catch(InvalidMoveException ime){
             System.out.println(ime);
@@ -199,20 +216,27 @@ public class Game {
     }
 
     private void managePawnPromotion(Move move, BoardPanel bp) {
-        String promotedPieceType = (String) JOptionPane.showInputDialog(null,
-                    "Select promoted piece", "Pawn Promotion", JOptionPane.QUESTION_MESSAGE, null,
-                    new String[]{"Bishop", "Rook", "Knight", "Queen"}, "Bishop");
-        if(promotedPieceType == null)
-            promotedPieceType = "Pawn";
+        String promotedPieceType;
+
+        if(isAnOnlineGame && !isYourTurn)
+            promotedPieceType = comunicationManager.getPromotedPieceType();
+        else{
+            promotedPieceType = (String) JOptionPane.showInputDialog(null,
+                        "Select promoted piece", "Pawn Promotion", JOptionPane.QUESTION_MESSAGE, null,
+                        new String[]{"Bishop", "Rook", "Knight", "Queen"}, "Bishop");
+            if(promotedPieceType == null)
+                promotedPieceType = "Pawn";
+        }
         Piece nP =
-        switch (promotedPieceType){
-            case "Bishop" -> new Bishop(move.getSourcePiece().getColor());
-            case "Rook" -> new Rook(move.getSourcePiece().getColor());
-            case "Knight" -> new Knight(move.getSourcePiece().getColor());
-            case "Queen" -> new Queen(move.getSourcePiece().getColor());
-            case "Pawn" -> move.sourcePiece;
-            default -> throw new IllegalStateException("Unexpected value: " + promotedPieceType);
-        };
+                switch (promotedPieceType){
+                    case "Bishop" -> new Bishop(move.getSourcePiece().getColor());
+                    case "Rook" -> new Rook(move.getSourcePiece().getColor());
+                    case "Knight" -> new Knight(move.getSourcePiece().getColor());
+                    case "Queen" -> new Queen(move.getSourcePiece().getColor());
+                    case "Pawn" -> move.sourcePiece;
+                    default -> throw new IllegalStateException("Unexpected value: " + promotedPieceType);
+                };
+        move.setPromotedPieceType(promotedPieceType);
         board.getTile(move.getTargetRow(), move.getTargetColumns()).setPiece(nP);
         board.getTile(move.getSourceRow(), move.getSourceColumns()).setPiece(null);
         removePieceFromArmy(move.sourcePiece);
@@ -251,5 +275,33 @@ public class Game {
 
     public MovesHistory getMovesHistory() {
         return mH;
+    }
+
+    public void makeOnlineGame(int color, OnlineComunicationManager comunicationManager) {
+        isAnOnlineGame = true;
+        player = color == 0 ? Color.WHITE : Color.BLACK;
+        this.comunicationManager = comunicationManager;
+        comunicationManager.setBoard(board);
+        isYourTurn = (color == 0);
+        if(color == 1)
+            new Thread(comunicationManager).start();
+    }
+
+    public boolean isYourTurn() {
+        return isYourTurn;
+    }
+
+    public void setYourTurn(boolean yourTurn) {
+        isYourTurn = yourTurn;
+        if(!yourTurn)
+            new Thread(comunicationManager).start();
+    }
+
+    public Color getPlayer() {
+        return player;
+    }
+
+    public boolean isAnOnlineGame() {
+        return isAnOnlineGame;
     }
 }

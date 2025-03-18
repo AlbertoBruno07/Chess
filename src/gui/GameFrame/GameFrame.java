@@ -6,7 +6,7 @@ import java.awt.*;
 
 public class GameFrame extends JFrame {
     public BoardPanel bP;
-    private core.Game game;
+    public core.Game game;
 
     public GameFrame(Image icon, IconManager iconManager){
         long iniT = System.nanoTime();
@@ -37,5 +37,11 @@ public class GameFrame extends JFrame {
     public void dispose() {
         AsideWindow.getInstance().dispose();
         super.dispose();
+    }
+
+    public void makeOnlineGame(int resOfCreation, OnlineComunicationManager comunicationManager) {
+        comunicationManager.setBoardPanel(bP);
+        game.makeOnlineGame(resOfCreation, comunicationManager);
+        if(resOfCreation == 1) bP.reverseBoard();
     }
 }
