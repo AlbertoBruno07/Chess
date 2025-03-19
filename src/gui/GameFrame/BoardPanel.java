@@ -179,11 +179,11 @@ public class BoardPanel extends JPanel {
         checkMateColor = turn;
         int r = BackgroundOverlay.getStaticInstance().getKingR(turn),
                 c = BackgroundOverlay.getStaticInstance().getKingC(turn);
+        clearPiece(r, c);
         if(isReversed){
             r = 7-r;
             c = 7-c;
         }
-        clearPiece(r, c);
         tiles[r][c].removeAll();
         tiles[r][c].add(iconManager.getCheckMateLabel(turn));
         tiles[r][c].updateUI();
@@ -221,6 +221,11 @@ public class BoardPanel extends JPanel {
                 targetRow = move.getTargetRow(),
                 targetColumn = move.getTargetColumns();
 
+        if(checkR != -1){
+            unhighlightSourceTile(checkR, checkC);
+            setCheckCoords(-1, -1);
+        }
+
         boolean isEating = boardToBeDisplayed.getPiece(targetRow, targetColumn) != null;
         if(game.processMove(sourceRow, sourceColumn, targetRow, targetColumn, this)) {
             Piece tP = boardToBeDisplayed.getPiece(targetRow, targetColumn);
@@ -230,11 +235,6 @@ public class BoardPanel extends JPanel {
                 PlaySound.playCapture();
             else
                 PlaySound.playMove();
-        }
-
-        if(checkR != -1){
-            unhighlightSourceTile(checkR, checkC);
-            setCheckCoords(-1, -1);
         }
 
         kingIsInCheck(Color.BLACK);
