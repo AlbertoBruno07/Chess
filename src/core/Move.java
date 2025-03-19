@@ -36,6 +36,7 @@ public class Move {
         this.targetRow = targetRow;
         this.targetColumns = targetColumns;
         this.board = board;
+        this.promotedPieceType = null;
         sourcePiece = board.getPiece(sourceRow, sourceColumns);
         targetPiece = board.getPiece(targetRow, targetColumns);
         setCheckTile(-1, -1);

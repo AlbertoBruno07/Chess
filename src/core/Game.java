@@ -291,10 +291,16 @@ public class Game {
         return isYourTurn;
     }
 
+    Thread t;
+
     public void setYourTurn(boolean yourTurn) {
         isYourTurn = yourTurn;
-        if(!yourTurn)
-            new Thread(comunicationManager).start();
+        if(!yourTurn) {
+            if(t != null)
+                t.interrupt();
+            t = new Thread(comunicationManager);
+            t.start();
+        }
     }
 
     public Color getPlayer() {

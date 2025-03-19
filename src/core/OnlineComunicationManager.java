@@ -47,16 +47,23 @@ public class OnlineComunicationManager implements Runnable{
 
     public void sendMove(Move move){
         try {
+            System.out.println("Sending move");
             outputStream.write(move.getSourceRow());
             outputStream.write(move.getSourceColumns());
             outputStream.write(move.getTargetRow());
             outputStream.write(move.getTargetColumns());
+            System.out.println("Move sent");
             if(move.getPromotedPieceType() != null) {
+                System.out.println("Writing one");
                 outputStream.write(1);
+                System.out.println("Wrote one");
                 sendPromotedPieceType(move.getPromotedPieceType());
             }
-            else
+            else{
+                System.out.println("Writing zero");
                 outputStream.write(0);
+                System.out.println("Wrote zero");
+            }
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
@@ -70,10 +77,16 @@ public class OnlineComunicationManager implements Runnable{
         int sR, sC, tR, tC;
 
         try {
+            System.out.println("Getting move");
             sR = inputStream.read();
+            System.out.println(sR);
             sC = inputStream.read();
+            System.out.println(sC);
             tR = inputStream.read();
+            System.out.println(tR);
             tC = inputStream.read();
+            System.out.println(tC);
+            System.out.println("Move gotten");
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
@@ -93,6 +106,7 @@ public class OnlineComunicationManager implements Runnable{
     public void run() {
         nextOppenentMove = getMove();
         boardPanel.processOnlineOpponentMove(nextOppenentMove);
+        Thread.currentThread().interrupt();
     }
 
     //To be reviewed
@@ -107,7 +121,9 @@ public class OnlineComunicationManager implements Runnable{
     public String getPromotedPieceType() {
         int pieceType;
         try {
+            System.out.println("Getting promoted piece type");
             pieceType = inputStream.read();
+            System.out.println("Promoted piece type gotten");
         } catch (IOException e) {
             throw new RuntimeException(e);
         }

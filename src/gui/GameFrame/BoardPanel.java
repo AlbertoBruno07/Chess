@@ -207,7 +207,7 @@ public class BoardPanel extends JPanel {
 
     public void processMoveEnd(){
         if(game.isAnOnlineGame()) {
-            game.setYourTurn(false);
+            game.setYourTurn(!game.isYourTurn());
         }
         setCheckCoords(-1, -1);
     }
