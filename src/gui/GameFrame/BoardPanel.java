@@ -206,13 +206,50 @@ public class BoardPanel extends JPanel {
     }
 
     public void processMoveEnd(){
-        if(game.isAnOnlineGame()) {
+        if(game.isAnOnlineGame() || game.isStockfishPlaying()) {
             game.setYourTurn(!game.isYourTurn());
         }
         setCheckCoords(-1, -1);
     }
 
     public void processOnlineOpponentMove(Move move){
+        if(game.isYourTurn()) //Shouldn't happen, but better safe than sorry
+            return;
+
+        int sourceRow = move.getSourceRow(),
+                sourceColumn = move.getSourceColumns(),
+                targetRow = move.getTargetRow(),
+                targetColumn = move.getTargetColumns();
+
+        if(checkR != -1){
+            unhighlightSourceTile(checkR, checkC);
+            setCheckCoords(-1, -1);
+        }
+
+        boolean isEating = boardToBeDisplayed.getPiece(targetRow, targetColumn) != null;
+        if(game.processMove(sourceRow, sourceColumn, targetRow, targetColumn, this)) {
+            Piece tP = boardToBeDisplayed.getPiece(targetRow, targetColumn);
+            clearPiece(sourceRow, sourceColumn);
+            drawPiece(targetRow, targetColumn, tP.getType(), tP.getColor());
+            if (isEating)
+                PlaySound.playCapture();
+            else
+                PlaySound.playMove();
+        }
+
+        kingIsInCheck(Color.BLACK);
+        kingIsInCheck(Color.WHITE);
+
+        if(BackgroundOverlay.getStaticInstance().checkMate(Color.BLACK))
+            drawCheckMate(Color.BLACK);
+        if(BackgroundOverlay.getStaticInstance().checkMate(Color.WHITE))
+            drawCheckMate(Color.WHITE);
+
+        game.setYourTurn(true);
+    }
+
+
+    public void processStockfishMove(Move move) {
         if(game.isYourTurn()) //Shouldn't happen, but better safe than sorry
             return;
 

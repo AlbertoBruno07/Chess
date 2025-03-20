@@ -223,7 +223,7 @@ public class Move {
     @Override
     public String toString() {
         return "" +
-                (char)(97+sourceRow) + sourceColumns + " " +
-                (char)(97+targetRow) + targetColumns;
+                (char)(97+sourceColumns) + (8-sourceRow) +
+                (char)(97+targetColumns) + (8-targetRow);
     }
 }

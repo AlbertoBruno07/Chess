@@ -87,6 +87,19 @@ public class StartDialBox {
         });
         mainFrame.add(startOnlineGame);
 
+        //Stockfish game
+        JButton startStockfishGame = new JButton("Stockfish Game");
+        startStockfishGame.setBorderPainted(false);
+        startStockfishGame.setFocusPainted(false);
+        startStockfishGame.setBounds(360, 170, 130, 40);
+        startStockfishGame.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                startStockfishGame();
+            }
+        });
+        mainFrame.add(startStockfishGame);
+
         //Image
         JLabel label = new JLabel(new ImageIcon(whiteIcon.getScaledInstance(230, 230, Image.SCALE_SMOOTH)));
         label.setSize(230,230);
@@ -102,6 +115,18 @@ public class StartDialBox {
         //long iniT = System.nanoTime();
         PlaySound.initializePlaySound();
         //System.out.println("[Playsound] exT = " + (System.nanoTime() - iniT));
+    }
+
+    private void startStockfishGame() {
+        try {
+            backgroundWorker.get();
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
+        } catch (ExecutionException e) {
+            throw new RuntimeException(e);
+        }
+        gameFrame.makeStokfishPlay();
+        startNormalGame();
     }
 
     private void startOnlineGame() {

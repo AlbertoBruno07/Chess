@@ -1,5 +1,6 @@
 package core;
 
+import engine.Engine;
 import gui.GameFrame.AsideWindow;
 import gui.GameFrame.BoardPanel;
 
@@ -22,6 +23,9 @@ public class Game {
     private Color player;
     private OnlineComunicationManager comunicationManager;
     private boolean isYourTurn;
+    //Stockfish game
+    private Engine stockfish;
+    private boolean isStockfishPlaying;
 
     public static Piece getPossibleEnPassant() {
         return possibleEnPassant;
@@ -39,7 +43,9 @@ public class Game {
     public Game() {
         turn = Color.WHITE;
         isAnOnlineGame = false;
+        isStockfishPlaying = false;
         isYourTurn = true;
+        stockfish = null;
         blackArmy = new ArrayList<>();
         whiteArmy = new ArrayList<>();
         board = new Board();
@@ -146,6 +152,8 @@ public class Game {
             mH.insertAMove(move);
             if(isAnOnlineGame && isYourTurn)
                 comunicationManager.sendMove(move);
+            if(isStockfishPlaying)
+                stockfish.appendMove(move);
             bp.processMoveEnd();
             return false; //Do not wanna render normally, let BoardPanel believe the move is invalid
         }
@@ -156,6 +164,8 @@ public class Game {
             mH.insertAMove(move);
             if(isAnOnlineGame && isYourTurn)
                 comunicationManager.sendMove(move);
+            if(isStockfishPlaying)
+                stockfish.appendMove(move);
             return true; //Wanna render normally
         }
 
@@ -164,6 +174,8 @@ public class Game {
             mH.insertAMove(move);
             if(isAnOnlineGame && isYourTurn)
                 comunicationManager.sendMove(move);
+            if(isStockfishPlaying)
+                stockfish.appendMove(move);
             bp.processMoveEnd();
             return false; //Do not wanna render normally, let BoardPanel believe the move is invalid
         }
@@ -190,6 +202,8 @@ public class Game {
             mH.insertAMove(move);
             if(isAnOnlineGame && isYourTurn)
                 comunicationManager.sendMove(move);
+            if(isStockfishPlaying)
+                stockfish.appendMove(move);
             return true;
         } catch(InvalidMoveException ime){
             System.out.println(ime);
@@ -220,6 +234,8 @@ public class Game {
 
         if(isAnOnlineGame && !isYourTurn)
             promotedPieceType = comunicationManager.getPromotedPieceType();
+        else if(isStockfishPlaying && !isYourTurn)
+            promotedPieceType = stockfish.getPromotedPieceType();
         else{
             promotedPieceType = (String) JOptionPane.showInputDialog(null,
                         "Select promoted piece", "Pawn Promotion", JOptionPane.QUESTION_MESSAGE, null,
@@ -291,16 +307,23 @@ public class Game {
         return isYourTurn;
     }
 
-    Thread t;
+    private Thread t;
 
     public void setYourTurn(boolean yourTurn) {
         isYourTurn = yourTurn;
-        if(!yourTurn) {
+        if(!yourTurn && isAnOnlineGame) {
             if(t != null)
                 t.interrupt();
             t = new Thread(comunicationManager);
             t.start();
         }
+        if(!yourTurn && isStockfishPlaying){
+            manageStockfishMove();
+        }
+    }
+
+    private void manageStockfishMove() {
+        stockfish.makeMove();
     }
 
     public Color getPlayer() {
@@ -309,5 +332,15 @@ public class Game {
 
     public boolean isAnOnlineGame() {
         return isAnOnlineGame;
+    }
+
+    public void makeStockfishPlay(Engine stockfish) {
+        isStockfishPlaying = true;
+        this.stockfish = stockfish;
+        setYourTurn(false); //Managing first move
+    }
+
+    public boolean isStockfishPlaying() {
+        return isStockfishPlaying;
     }
 }

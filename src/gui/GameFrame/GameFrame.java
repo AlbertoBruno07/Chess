@@ -1,6 +1,8 @@
 package gui.GameFrame;
 
 import core.*;
+import engine.Engine;
+
 import javax.swing.*;
 import java.awt.*;
 
@@ -43,5 +45,9 @@ public class GameFrame extends JFrame {
         comunicationManager.setBoardPanel(bP);
         game.makeOnlineGame(resOfCreation, comunicationManager);
         if(resOfCreation == 1) bP.reverseBoard();
+    }
+
+    public void makeStokfishPlay() {
+        game.makeStockfishPlay(new Engine(game.getBoard(), bP));
     }
 }
