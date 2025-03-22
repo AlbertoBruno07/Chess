@@ -9,6 +9,7 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.util.concurrent.Semaphore;
 
 public class AsideWindow extends JFrame {
     private static AsideWindow instance;
@@ -21,6 +22,8 @@ public class AsideWindow extends JFrame {
     private BoardPanel bP;
     private Game game;
     private IconManager iconManager;
+    private JLabel whiteTimeLabel, blackTimeLabel;
+    private static Semaphore semaphore;
 
     //Usefull to have some extra attributes accessible straight-forward
     private static class MoveButton extends JButton{
@@ -105,6 +108,8 @@ public class AsideWindow extends JFrame {
         whitePoints.setIcon(iconManager.getSmallIcon(PieceType.KING, core.Color.WHITE));
         whitePoints.setText("0");
         bottomPanel.add(whitePoints, BorderLayout.EAST);
+
+        semaphore = new Semaphore(1);
     }
 
     public static void initializeAsideWindow(BoardPanel bp, Game game, MovesHistory mH, IconManager iM, Image icon){
@@ -119,14 +124,34 @@ public class AsideWindow extends JFrame {
     }
 
     public static AsideWindow getInstance() {
-        return instance;
+        try {
+            semaphore.acquire();
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
+        }
+        AsideWindow instanceToReturn = instance;
+        semaphore.release();
+
+        return instanceToReturn;
     }
 
     public static void makeVisible(){
+        try {
+            semaphore.acquire();
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
+        }
         instance.setVisible(true);
+        semaphore.release();
     }
 
     public static void addAnElement(Move m){
+        try {
+            semaphore.acquire();
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
+        }
+
         MoveButton btn = new MoveButton(m.toString(), instance.moveBtnNumber);
         btn.setFont(new Font(btn.getFont().getName(), Font.PLAIN, 18));
         btn.setBackground(Color.GRAY);
@@ -175,12 +200,71 @@ public class AsideWindow extends JFrame {
                 .setValue(instance.scrollPane.getVerticalScrollBar().getMaximum()));
         instance.scrollPane.updateUI();
         instance.moveBtnNumber++;
+
+        semaphore.release();
     }
 
     public static void updateScore(core.Color color, int newPoints) {
+        try {
+            semaphore.acquire();
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
+        }
+
         if(color == core.Color.BLACK)
             instance.blackPoints.setText("" + newPoints);
         else
             instance.whitePoints.setText("" + newPoints);
+
+        semaphore.release();
+    }
+
+    public static void makeTime(timer.Timer timer){
+
+        JPanel endPanel = new JPanel(new BorderLayout());
+        endPanel.setMaximumSize(new Dimension(250,100));
+        endPanel.setBackground(Color.GRAY);
+
+        JPanel whiteTime = new JPanel(new BorderLayout());
+        whiteTime.setBackground(Color.GRAY);
+        instance.whiteTimeLabel = new JLabel();
+        instance.whiteTimeLabel.setFont(new Font(instance.whiteTimeLabel.getFont().getName(), instance.whiteTimeLabel.getFont().getStyle(), 28));
+        JLabel whiteKingSymbol = new JLabel(instance.iconManager.getSmallIcon(PieceType.KING, core.Color.WHITE));
+        whiteTime.setMaximumSize(new Dimension(270,100));
+        whiteTime.add(whiteKingSymbol, BorderLayout.WEST);
+        whiteTime.add(instance.whiteTimeLabel);
+        updateTime(core.Color.WHITE, timer.getInitialTime());
+
+        JPanel blackTime = new JPanel(new BorderLayout());
+        blackTime.setBackground(Color.GRAY);
+        instance.blackTimeLabel = new JLabel();
+        instance.blackTimeLabel.setFont(new Font(instance.blackTimeLabel.getFont().getName(), instance.blackTimeLabel.getFont().getStyle(), 28));
+        JLabel blackKingSymbol = new JLabel(instance.iconManager.getSmallIcon(PieceType.KING, core.Color.BLACK));
+        blackTime.setMaximumSize(new Dimension(270,100));
+        blackTime.add(blackKingSymbol, BorderLayout.WEST);
+        blackTime.add(instance.blackTimeLabel);
+        updateTime(core.Color.BLACK, timer.getInitialTime());
+
+        endPanel.add(whiteTime, BorderLayout.WEST);
+        endPanel.add(blackTime, BorderLayout.EAST);
+
+        instance.add(endPanel);
+    }
+
+    public static void updateTime(core.Color turn, int newTime) {
+        try {
+            semaphore.acquire();
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
+        }
+
+        int min = newTime/60;
+        int sec = newTime - (min*60);
+        if(turn == core.Color.WHITE)
+            instance.whiteTimeLabel.setText("" + min + ":" + (sec < 10 ? "0" : "") + sec);
+        else
+            instance.blackTimeLabel.setText("" + min + ":" + (sec < 10 ? "0" : "") + sec);
+
+        semaphore.release();
     }
 }

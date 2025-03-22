@@ -23,6 +23,9 @@ public class Game {
     private Color player;
     private OnlineComunicationManager comunicationManager;
     private boolean isYourTurn;
+    private timer.Timer timer;
+    private Thread timeThread;
+
     //Stockfish game
     private Engine stockfish;
     private boolean isStockfishPlaying;
@@ -299,6 +302,10 @@ public class Game {
         this.comunicationManager = comunicationManager;
         comunicationManager.setBoard(board);
         isYourTurn = (color == 0);
+        makeTimer();
+        AsideWindow.makeTime(timer);
+        timeThread = new Thread(() -> timer.tick(Color.WHITE));
+        timeThread.start();
         if(color == 1)
             new Thread(comunicationManager).start();
     }
@@ -307,23 +314,37 @@ public class Game {
         return isYourTurn;
     }
 
+    public void makeTimer(){
+        timer = new timer.Timer(comunicationManager.getTime());
+    }
+
     private Thread t;
 
-    public void setYourTurn(boolean yourTurn) {
+    public void setYourTurn(boolean yourTurn, BoardPanel bP) {
         isYourTurn = yourTurn;
-        if(!yourTurn && isAnOnlineGame) {
-            if(t != null)
-                t.interrupt();
-            t = new Thread(comunicationManager);
-            t.start();
+        if(isAnOnlineGame) {
+            if(timeThread != null)
+                timeThread.interrupt();
+            timeThread = new Thread(() -> timer.tick(turn));
+            timeThread.start();
+
+            if(!yourTurn) {
+                if (t != null)
+                    t.interrupt();
+                t = new Thread(comunicationManager);
+                t.start();
+            }
         }
         if(!yourTurn && isStockfishPlaying){
             manageStockfishMove();
         }
+        if(yourTurn && (isStockfishPlaying || isAnOnlineGame)){
+            bP.movePreview();
+        }
     }
 
     private void manageStockfishMove() {
-        stockfish.makeMove();
+        new Thread(() -> stockfish.makeMove()).start();
     }
 
     public Color getPlayer() {
@@ -336,8 +357,9 @@ public class Game {
 
     public void makeStockfishPlay(Engine stockfish) {
         isStockfishPlaying = true;
+        player = Color.BLACK;
         this.stockfish = stockfish;
-        setYourTurn(false); //Managing first move
+        setYourTurn(false, null); //Managing first move ; bP will not be necessary
     }
 
     public boolean isStockfishPlaying() {

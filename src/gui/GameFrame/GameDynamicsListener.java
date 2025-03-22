@@ -7,6 +7,8 @@ import java.awt.event.MouseMotionListener;
 public class GameDynamicsListener implements MouseListener, MouseMotionListener {
     private BoardPanel bP;
     private int r, c;
+    
+    private static int mouseR, mouseC;
 
     public GameDynamicsListener(BoardPanel bP, int r, int c) {
         this.bP = bP;
@@ -30,6 +32,14 @@ public class GameDynamicsListener implements MouseListener, MouseMotionListener 
         return mouseY/BoardPanel.TILE_DIMENSION;
     }
 
+    public static int getMouseR() {
+        return mouseR;
+    }
+
+    public static int getMouseC() {
+        return mouseC;
+    }
+
     @Override
     public void mouseClicked(MouseEvent e) {
 
@@ -38,12 +48,12 @@ public class GameDynamicsListener implements MouseListener, MouseMotionListener 
     @Override
     public void mousePressed(MouseEvent e) {
         if(!AsideWindow.isOnPreviewsBoard) {
-            int R = r, C = c;
+            mouseR = r; mouseC = c;
             if(bP.isReversed){
-                R = 7-r;
-                C = 7-c;
+                mouseR = 7-r;
+                mouseC = 7-c;
             }
-            bP.onMove(R, C);
+            bP.onMove(mouseR, mouseC);
         }
     }
 
@@ -54,18 +64,19 @@ public class GameDynamicsListener implements MouseListener, MouseMotionListener 
 
     @Override
     public void mouseEntered(MouseEvent e) {
+        mouseR = r; mouseC = c;
+        if(bP.isReversed){
+            mouseR = 7-r;
+            mouseC = 7-c;
+        }
         if(!AsideWindow.isOnPreviewsBoard) {
-            int R = r, C = c;
-            if(bP.isReversed){
-                R = 7-r;
-                C = 7-c;
-            }
-            bP.movePreview(R, C, false);
+            bP.movePreview(mouseR, mouseC, false);
         }
     }
 
     @Override
     public void mouseExited(MouseEvent e) {
+        mouseR = -1; mouseC = -1;
         bP.flushMovePreview();
     }
 

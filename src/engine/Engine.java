@@ -1,11 +1,12 @@
 package engine;
 
-import core.Board;
-import core.Move;
+import core.*;
 import gui.GameFrame.BoardPanel;
 
 import java.io.*;
 import java.util.Scanner;
+
+import static java.lang.Math.abs;
 
 public class Engine {
 
@@ -67,7 +68,7 @@ public class Engine {
         sendCommand("ucinewgame");
         sendCommand(positionCommand);
         System.out.println(positionCommand);
-        sendCommand("go movetime 10");
+        sendCommand("go movetime 300");
         String read = "";
         while(reader.hasNextLine()) {
             read = reader.nextLine();
@@ -99,7 +100,26 @@ public class Engine {
                     default -> throw new IllegalStateException("Unexpected value: " + read.charAt(4));
                 });
             }
+        manageCastling(move); //A castling move is defined in a different way internally
         return move;
+    }
+
+    private void manageCastling(Move move) {
+        Piece piece = move.getSourcePiece();
+
+        if(piece.getType() != PieceType.KING)
+            return;
+
+        if(piece.getPosC() != 4)
+            return;
+
+        if(piece.getPosR() != (piece.getColor() == Color.WHITE ? 7 : 0))
+            return;
+
+        if(abs(piece.getPosC() - move.getTargetColumns()) != 2)
+            return;
+
+        move.setTargetColumns((piece.getPosC() < move.getTargetColumns() ? 7 : 0));
     }
 
     public void makeMove() {

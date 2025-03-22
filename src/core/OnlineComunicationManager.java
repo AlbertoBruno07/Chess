@@ -151,4 +151,15 @@ public class OnlineComunicationManager implements Runnable{
             throw new RuntimeException(e);
         }
     }
+
+    public int getTime() {
+        int res = 0;
+        try {
+            res += inputStream.read();
+            res += inputStream.read() << 8;
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+        return res;
+    }
 }

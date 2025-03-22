@@ -11,6 +11,7 @@ public class Move {
     private int targetColumns;
     private int scoreBlack, scoreWhite;
     private String promotedPieceType;
+    private String castlingRepresentation;
 
     Piece sourcePiece, targetPiece;
 
@@ -37,6 +38,7 @@ public class Move {
         this.targetColumns = targetColumns;
         this.board = board;
         this.promotedPieceType = null;
+        castlingRepresentation = null;
         sourcePiece = board.getPiece(sourceRow, sourceColumns);
         targetPiece = board.getPiece(targetRow, targetColumns);
         setCheckTile(-1, -1);
@@ -155,6 +157,9 @@ public class Move {
             ac += s;
         }
 
+        castlingRepresentation = "" + (char)(97+king.getPosC()) + (8-king.getPosR()) +
+                (char)(97+ king.getPosC() + (2*s)) + (8-king.getPosR());
+
         return true;
     }
 
@@ -220,8 +225,16 @@ public class Move {
         this.promotedPieceType = promotedPieceType;
     }
 
+    //Used for stockfish
+    public void setTargetColumns(int sourceColumns) {
+        this.targetColumns = sourceColumns;
+    }
+
     @Override
     public String toString() {
+        if(castlingRepresentation != null)
+            return castlingRepresentation;
+
         return "" +
                 (char)(97+sourceColumns) + (8-sourceRow) +
                 (char)(97+targetColumns) + (8-targetRow);
