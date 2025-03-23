@@ -41,10 +41,8 @@ public class BackgroundOverlay {
     }
 
     public static BackgroundOverlay getStaticInstance(Board board){
-        if(instance == null) {
-            instance = new BackgroundOverlay(board);
-            instance.initialize();
-        }
+        instance = new BackgroundOverlay(board);
+        instance.initialize();
         return instance;
     }
 
@@ -459,8 +457,7 @@ public class BackgroundOverlay {
                             try {
                                 wouldEndInKingCheck(m);
                                 possibleTiles.add(new Tile(i, j, null));
-                            } catch (Exception e) {
-                            }
+                            } catch (Exception e) {}
                         }
                     } else{
                         Move m = new Move(p.getPosR(), p.getPosC(), i, j, board);

@@ -2,12 +2,15 @@ package Settings;
 
 import netscape.javascript.JSObject;
 
+import java.awt.*;
 import java.io.*;
 import java.util.ArrayList;
+import java.util.concurrent.Semaphore;
 
 public class Settings implements Serializable {
     private String selectedIconPackage;
     private String selectedSoundPackage;
+    private Color color1, color2, color3, color4;
     private static Settings instance = new Settings();
     
     private static ArrayList<String> possibleIconPacksAL;
@@ -30,7 +33,7 @@ public class Settings implements Serializable {
             possibleSoundPacks[i] = possibleSoundPacksAL.get(i);
 
         try{
-            instance.validateSettings();
+            getInstance().validateSettings();
         } catch(InvalidSettingException ise){
             System.out.println(ise);
         }
@@ -82,23 +85,60 @@ public class Settings implements Serializable {
     }
 
     public static void initializeSettingsToDefault(){
-        instance.selectedIconPackage = "Standard";
+        getInstance().selectedIconPackage = "Standard";
+        getInstance().selectedSoundPackage = "Standard";
+        getInstance().color1 = Color.DARK_GRAY;
+        getInstance().color2 = Color.WHITE;
+        getInstance().color3 = Color.GREEN;
+        getInstance().color4 = Color.CYAN;
     }
 
     public static String getSelectedIconPackage() {
-        return instance.selectedIconPackage;
+        return getInstance().selectedIconPackage;
     }
 
     public static void setSelectedIconPackage(String selectedIconPackage) {
-        instance.selectedIconPackage = selectedIconPackage;
+        getInstance().selectedIconPackage = selectedIconPackage;
     }
 
     public static String getSelectedSoundPackage(){
-        return instance.selectedSoundPackage;
+        return getInstance().selectedSoundPackage;
     }
 
     public static void setSelectedSoundPackage(String selectedSoundPackage){
-        instance.selectedSoundPackage = selectedSoundPackage;
+        getInstance().selectedSoundPackage = selectedSoundPackage;
+    }
+
+    public static void setColor1(Color c){
+        getInstance().color1 = c;
+    }
+
+    public static void setColor2(Color c){
+        getInstance().color2 = c;
+    }
+
+    public static void setColor3(Color c){
+        getInstance().color3 = c;
+    }
+
+    public static void setColor4(Color c){
+        getInstance().color4 = c;
+    }
+
+    public static Color getColor1(){
+        return getInstance().color1;
+    }
+
+    public static Color getColor2(){
+        return getInstance().color2;
+    }
+
+    public static Color getColor3(){
+        return getInstance().color3;
+    }
+
+    public static Color getColor4(){
+        return getInstance().color4;
     }
 
     public static Settings getInstance() {
@@ -109,7 +149,7 @@ public class Settings implements Serializable {
         try {
             FileOutputStream fout = new FileOutputStream("./src/Settings/config.jcs");
             ObjectOutputStream oos = new ObjectOutputStream(fout);
-            oos.writeObject(instance);
+            oos.writeObject(getInstance());
             oos.flush();
             oos.close();
             fout.close();

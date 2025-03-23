@@ -54,4 +54,14 @@ public class MovesHistory {
             return game.getScoreBoard().getWhitePoints();
         return history.get(id).getScoreWhite();
     }
+    public int getMoveSourceR(int id){
+        if(id == -1)
+            return history.getLast().getSourceRow();
+        return history.get(id).getSourceRow();
+    }
+    public int getMoveSourceC(int id){
+        if(id == -1)
+            return history.getLast().getSourceColumns();
+        return history.get(id).getSourceColumns();
+    }
 }

@@ -5,6 +5,8 @@ import core.Move;
 import core.MovesHistory;
 import core.PieceType;
 
+import Settings.Settings;
+
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
@@ -36,12 +38,12 @@ public class AsideWindow extends JFrame {
 
         public void reset(){
             state = false;
-            super.setBackground(Color.GRAY);
+            super.setBackground(Settings.getColor1().equals(Color.DARK_GRAY) ? Color.GRAY : Settings.getColor1());
         }
 
         public void clicked(){
             state = true;
-            super.setBackground(Color.GREEN);
+            super.setBackground(Settings.getColor3());
         }
 
         public MoveButton(String text, int id) {
@@ -60,12 +62,12 @@ public class AsideWindow extends JFrame {
         setTitle("Aside Window");
         setSize(270, 700);
         setDefaultCloseOperation(DISPOSE_ON_CLOSE);
-        getContentPane().setBackground(Color.GRAY); //ciao bruno da reby
+        getContentPane().setBackground(Settings.getColor1().equals(Color.DARK_GRAY) ? Color.GRAY : Settings.getColor1()); //ciao bruno da reby
         getContentPane().setLayout(new BoxLayout(getContentPane(), BoxLayout.Y_AXIS));
         setResizable(true);
 
         JPanel topPanel = new JPanel(new GridLayout());
-        topPanel.setBackground(Color.GRAY);
+        topPanel.setBackground(Settings.getColor1().equals(Color.DARK_GRAY) ? Color.GRAY : Settings.getColor1());
         topPanel.setMaximumSize(new Dimension(300, 200));
         add(topPanel, BorderLayout.PAGE_START);
 
@@ -75,7 +77,7 @@ public class AsideWindow extends JFrame {
         topPanel.add(label, BorderLayout.WEST);
 
         panel = new JPanel();
-        panel.setBackground(Color.GRAY);
+        panel.setBackground(Settings.getColor1().equals(Color.DARK_GRAY) ? Color.GRAY : Settings.getColor1());
         panel.setLayout(new BoxLayout(panel, BoxLayout.Y_AXIS));
 
         scrollPane = new JScrollPane(panel);
@@ -83,7 +85,7 @@ public class AsideWindow extends JFrame {
 
         JPanel bottomPanel = new JPanel(new GridLayout());
         bottomPanel.setMaximumSize(new Dimension(300, 200));
-        bottomPanel.setBackground(Color.GRAY);
+        bottomPanel.setBackground(Settings.getColor1().equals(Color.DARK_GRAY) ? Color.GRAY : Settings.getColor1());
         add(bottomPanel, BorderLayout.PAGE_END);
 
         JButton reversBoard = new JButton(IconManager.reverseBoardIcon);
@@ -154,7 +156,7 @@ public class AsideWindow extends JFrame {
 
         MoveButton btn = new MoveButton(m.toString(), instance.moveBtnNumber);
         btn.setFont(new Font(btn.getFont().getName(), Font.PLAIN, 18));
-        btn.setBackground(Color.GRAY);
+        btn.setBackground(Settings.getColor1().equals(Color.DARK_GRAY) ? Color.GRAY : Settings.getColor1());
         btn.setForeground(Color.BLACK);
         btn.setIcon(instance.iconManager.getSmallIcon(m.getSourcePiece().getType(), m.getSourcePiece().getColor()));
         btn.addActionListener(new ActionListener() {
@@ -177,6 +179,8 @@ public class AsideWindow extends JFrame {
                         isOnPreviewsBoard = true;
                         instance.bP.setCheckCoords(instance.movesHistory.getMoveCheckR(thisButton.id),
                                 instance.movesHistory.getMoveCheckC(thisButton.id));
+                        instance.bP.setLastSourceCoords(instance.movesHistory.getMoveSourceR(thisButton.id),
+                                instance.movesHistory.getMoveSourceC(thisButton.id));
                         instance.bP.displayBoard(instance.movesHistory.getMoveBoard(thisButton.id));
                     }
                     else {
@@ -189,6 +193,8 @@ public class AsideWindow extends JFrame {
                         isOnPreviewsBoard = false;
                         instance.bP.setCheckCoords(instance.movesHistory.getMoveCheckR(-1),
                                 instance.movesHistory.getMoveCheckC(-1));
+                        instance.bP.setLastSourceCoords(instance.movesHistory.getMoveSourceR(-1),
+                                instance.movesHistory.getMoveSourceC(-1));
                         instance.bP.displayBoard(instance.movesHistory.getMoveBoard(-1));
                     }
                 });
@@ -223,10 +229,10 @@ public class AsideWindow extends JFrame {
 
         JPanel endPanel = new JPanel(new BorderLayout());
         endPanel.setMaximumSize(new Dimension(250,100));
-        endPanel.setBackground(Color.GRAY);
+        endPanel.setBackground(Settings.getColor1().equals(Color.DARK_GRAY) ? Color.GRAY : Settings.getColor1());
 
         JPanel whiteTime = new JPanel(new BorderLayout());
-        whiteTime.setBackground(Color.GRAY);
+        whiteTime.setBackground(Settings.getColor1().equals(Color.DARK_GRAY) ? Color.GRAY : Settings.getColor1());
         instance.whiteTimeLabel = new JLabel();
         instance.whiteTimeLabel.setFont(new Font(instance.whiteTimeLabel.getFont().getName(), instance.whiteTimeLabel.getFont().getStyle(), 28));
         JLabel whiteKingSymbol = new JLabel(instance.iconManager.getSmallIcon(PieceType.KING, core.Color.WHITE));
@@ -236,7 +242,7 @@ public class AsideWindow extends JFrame {
         updateTime(core.Color.WHITE, timer.getInitialTime());
 
         JPanel blackTime = new JPanel(new BorderLayout());
-        blackTime.setBackground(Color.GRAY);
+        blackTime.setBackground(Settings.getColor1().equals(Color.DARK_GRAY) ? Color.GRAY : Settings.getColor1());
         instance.blackTimeLabel = new JLabel();
         instance.blackTimeLabel.setFont(new Font(instance.blackTimeLabel.getFont().getName(), instance.blackTimeLabel.getFont().getStyle(), 28));
         JLabel blackKingSymbol = new JLabel(instance.iconManager.getSmallIcon(PieceType.KING, core.Color.BLACK));

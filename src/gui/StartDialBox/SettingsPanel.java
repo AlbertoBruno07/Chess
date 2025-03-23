@@ -13,6 +13,7 @@ public class SettingsPanel extends JFrame{
     private JComboBox<String> selectIconPackage;
     private JComboBox<String> selectSoundPackage;
     private static SettingsPanel instance;
+    private JButton colorPicker1, colorPicker2, colorPicker3, colorPicker4;
 
     private StartDialBox startDialBox;
 
@@ -20,7 +21,7 @@ public class SettingsPanel extends JFrame{
 
     private SettingsPanel(Image icon, StartDialBox startDialBox) {
         setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE); //Do not wanna leave pending object
-        setSize(300, 400);
+        setSize(300, 410);
         setIconImage(icon);
         getContentPane().setBackground(Color.BLACK);
         setLayout(null);
@@ -51,10 +52,97 @@ public class SettingsPanel extends JFrame{
         setSelectedSoundPackageAsDefault();
         add(selectSoundPackage);
 
+        JLabel c1 = new JLabel("Color 1");
+        c1.setSize(100, 50);
+        c1.setLocation(50, 115);
+        c1.setForeground(Color.WHITE);
+        add(c1);
+
+        colorPicker1 = new JButton();
+        colorPicker1.setSize(30,30);
+        colorPicker1.setLocation(160, 125);
+        colorPicker1.setBackground(Settings.getColor1());
+        colorPicker1.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                Color c = JColorChooser.showDialog(
+                        null,
+                        "Color picker - 1",
+                        Settings.getColor1());
+                colorPicker1.setBackground(c);
+            }
+        });
+        add(colorPicker1);
+
+        JLabel c2 = new JLabel("Color 2");
+        c2.setSize(100, 50);
+        c2.setLocation(50, 165);
+        c2.setForeground(Color.WHITE);
+        add(c2);
+
+        colorPicker2 = new JButton();
+        colorPicker2.setSize(30,30);
+        colorPicker2.setLocation(160, 175);
+        colorPicker2.setBackground(Settings.getColor2());
+        colorPicker2.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                Color c = JColorChooser.showDialog(
+                        null,
+                        "Color picker - 2",
+                        Settings.getColor2());
+                colorPicker2.setBackground(c);
+            }
+        });
+        add(colorPicker2);
+
+        JLabel c3 = new JLabel("Color 3");
+        c3.setSize(100, 50);
+        c3.setLocation(50, 215);
+        c3.setForeground(Color.WHITE);
+        add(c3);
+
+        colorPicker3 = new JButton();
+        colorPicker3.setSize(30,30);
+        colorPicker3.setLocation(160, 225);
+        colorPicker3.setBackground(Settings.getColor3());
+        colorPicker3.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                Color c = JColorChooser.showDialog(
+                        null,
+                        "Color picker - 3",
+                        Settings.getColor3());
+                colorPicker3.setBackground(c);
+            }
+        });
+        add(colorPicker3);
+
+        JLabel c4 = new JLabel("Color 4");
+        c4.setSize(100, 50);
+        c4.setLocation(50, 265);
+        c4.setForeground(Color.WHITE);
+        add(c4);
+
+        colorPicker4 = new JButton();
+        colorPicker4.setSize(30,30);
+        colorPicker4.setLocation(160, 275);
+        colorPicker4.setBackground(Settings.getColor4());
+        colorPicker4.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                Color c = JColorChooser.showDialog(
+                        null,
+                        "Color picker - 4",
+                        Settings.getColor4());
+                colorPicker4.setBackground(c);
+            }
+        });
+        add(colorPicker4);
+
         JButton apply = new JButton("Apply");
         apply.setBorderPainted(false);
-        apply.setFocusPainted(false);
-        apply.setBounds(195, 315, 75, 30);
+        apply.setBounds(195, 325, 75, 30);
         apply.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
@@ -62,6 +150,23 @@ public class SettingsPanel extends JFrame{
             }
         });
         add(apply);
+
+        JButton reset = new JButton("Reset");
+        reset.setBorderPainted(false);
+        reset.setFocusPainted(false);
+        reset.setBounds(105, 325, 75, 30);
+        reset.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                Settings.initializeSettingsToDefault();
+                Settings.saveToFile();
+                instance.dispose();
+                instance = new SettingsPanel(icon, startDialBox);
+                instance.setVisible(true);
+            }
+        });
+        add(reset);
+
 
         this.startDialBox = startDialBox;
     }
@@ -77,6 +182,10 @@ public class SettingsPanel extends JFrame{
     private void apply() {
         Settings.setSelectedIconPackage((String) selectIconPackage.getSelectedItem());
         Settings.setSelectedSoundPackage((String) selectSoundPackage.getSelectedItem());
+        Settings.setColor1(colorPicker1.getBackground());
+        Settings.setColor2(colorPicker2.getBackground());
+        Settings.setColor3(colorPicker3.getBackground());
+        Settings.setColor4(colorPicker4.getBackground());
         Settings.saveToFile();
         startDialBox.updateIconManager(new IconManager());
         long iniT = System.nanoTime();

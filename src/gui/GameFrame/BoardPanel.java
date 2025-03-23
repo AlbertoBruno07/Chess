@@ -108,7 +108,7 @@ public class BoardPanel extends JPanel {
             c = 7-c;
         }
         return boardToBeDisplayed.getTile(r, c).getColor() == Color.WHITE ?
-                java.awt.Color.WHITE : java.awt.Color.DARK_GRAY;
+                Settings.getColor2() : Settings.getColor1();
     }
 
     public void highlightSourceTile(int r, int c){
@@ -116,7 +116,7 @@ public class BoardPanel extends JPanel {
             r = 7-r;
             c = 7-c;
         }
-        tiles[r][c].setBackground(java.awt.Color.GREEN);
+        tiles[r][c].setBackground(Settings.getColor3());
     }
 
     public void unhighlightSourceTile(int r, int c){
@@ -163,7 +163,7 @@ public class BoardPanel extends JPanel {
             moveIsOnGoing = false;
             flushMovePreview();
             processMove(sourceRow, sourceColumn, r, c);
-            if(lastSourceRow != sourceRow && lastSourceColumns != sourceColumn)
+            if(lastSourceRow != sourceRow || lastSourceColumns != sourceColumn)
                 unhighlightSourceTile(sourceRow, sourceColumn);
             kingIsInCheck(game.getTurn());
             if(BackgroundOverlay.getStaticInstance().checkMate(game.getTurn()))
@@ -344,7 +344,7 @@ public class BoardPanel extends JPanel {
             r = 7-r;
             c = 7-c;
         }
-        tiles[r][c].setBackground(java.awt.Color.CYAN);
+        tiles[r][c].setBackground(Settings.getColor4());
     }
 
     public void movePreview(){
@@ -372,7 +372,7 @@ public class BoardPanel extends JPanel {
             if(boardToBeDisplayed.getPiece(i.getRow(), i.getColumn()) != null)
                 highlightMenacedPiece(i.getRow(), i.getColumn());
             else
-                tiles[pMR][pMC].add(new circle(isForMove ? java.awt.Color.GREEN : java.awt.Color.GRAY));
+                tiles[pMR][pMC].add(new circle(isForMove ? Settings.getColor3() : java.awt.Color.GRAY));
             tiles[pMR][pMC].updateUI();
         }
     }
@@ -411,6 +411,7 @@ public class BoardPanel extends JPanel {
                 unhighlightSourceTile(i, j);
             }
 
+        highlightSourcePiece(lastSourceRow, lastSourceColumns);
         initializeGame();
 
         if(checkR != -1)
@@ -424,6 +425,11 @@ public class BoardPanel extends JPanel {
         checkR = r;
     }
 
+    public void setLastSourceCoords(int r, int c){
+        lastSourceRow = r;
+        lastSourceColumns = c;
+    }
+
     public void displayBoard(Board board) {
         boardToBeDisplayed = board;
         for(int i = 0; i < Board.getRows(); i++)
@@ -434,6 +440,8 @@ public class BoardPanel extends JPanel {
                 if(p != null)
                     drawPiece(i, j, p.getType(), p.getColor());
             }
+        if(lastSourceRow != -1)
+            highlightSourcePiece(lastSourceRow, lastSourceColumns);
         if(checkC != -1)
             highlightKingCheck(checkR, checkC);
         if(checkMateColor != null && !AsideWindow.isOnPreviewsBoard)
