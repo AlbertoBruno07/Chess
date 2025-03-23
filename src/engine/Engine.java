@@ -3,6 +3,7 @@ package engine;
 import core.*;
 import gui.gameFrame.BoardPanel;
 
+import javax.swing.*;
 import java.io.*;
 import java.util.Scanner;
 
@@ -29,7 +30,16 @@ public class Engine {
         firstMoveAppended = false;
         positionCommand = "position startpos";
 
-        ProcessBuilder pb = new ProcessBuilder("./src/engine/stockfish.exe");
+        String osName = System.getProperty("os.name"), osType = "";
+        if(osName.startsWith("linux") || osName.startsWith("LINUX"))
+            osType = "linux";
+        else if(osName.startsWith("Windows"))
+            osType = "windows";
+        else{
+            JOptionPane.showMessageDialog(null, "OS not supported");
+        }
+
+        ProcessBuilder pb = new ProcessBuilder("./src/engine/"+ osType + "/stockfish");
 
         try {
             process = pb.start();

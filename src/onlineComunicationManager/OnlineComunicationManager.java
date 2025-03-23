@@ -164,4 +164,13 @@ public class OnlineComunicationManager implements Runnable{
         }
         return res;
     }
+
+    public void sendTime(int time) {
+        try {
+            outputStream.write(time);
+            outputStream.write(time >> 8);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
 }

@@ -329,6 +329,10 @@ public class Game {
             if(timeThread != null)
                 timeThread.interrupt();
             timeThread = new Thread(() -> timer.tick(turn));
+            if(!yourTurn)
+                sendTimer();
+            else
+                timer.updateTime(turn == Color.WHITE ? Color.BLACK : Color.WHITE, comunicationManager.getTime());
             timeThread.start();
 
             if(!yourTurn) {
@@ -375,5 +379,9 @@ public class Game {
 
     public Thread getTimeThread() {
         return timeThread;
+    }
+
+    public void sendTimer(){
+        comunicationManager.sendTime(timer.getTime(turn == Color.WHITE ? Color.BLACK : Color.WHITE));
     }
 }
