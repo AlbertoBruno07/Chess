@@ -1,15 +1,11 @@
-package gui.GameFrame;
+package gui.gameFrame;
 
 import javax.sound.sampled.*;
 import javax.swing.*;
-import java.io.BufferedInputStream;
-import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
-import java.net.URL;
 import java.util.concurrent.ExecutionException;
 
-import Settings.Settings;
+import settings.Settings;
 
 public class PlaySound {
     private static PlaySound instance;

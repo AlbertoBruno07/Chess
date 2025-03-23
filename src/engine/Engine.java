@@ -1,7 +1,7 @@
 package engine;
 
 import core.*;
-import gui.GameFrame.BoardPanel;
+import gui.gameFrame.BoardPanel;
 
 import java.io.*;
 import java.util.Scanner;
@@ -123,7 +123,7 @@ public class Engine {
     }
 
     public void makeMove() {
-        boardPanel.processStockfishMove(getMove());
+        boardPanel.processExternalMove(getMove());
     }
 
     public String getPromotedPieceType() {

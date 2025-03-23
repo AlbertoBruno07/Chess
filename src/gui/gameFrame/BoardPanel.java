@@ -1,8 +1,11 @@
-package gui.GameFrame;
+package gui.gameFrame;
 
-import Settings.Settings;
+import gui.gameEndBox.GameEndBox;
+import settings.Settings;
 import core.*;
 import core.Color;
+import gui.asideWindow.AsideWindow;
+import movesHistory.MovesHistory;
 
 import javax.swing.*;
 import java.awt.*;
@@ -23,6 +26,7 @@ public class BoardPanel extends JPanel {
     private Board boardToBeDisplayed;
     private int checkR, checkC;
     private int lastSourceRow, lastSourceColumns;
+    private GameFrame gameFrame;
 
     public boolean isReversed;
 
@@ -45,8 +49,9 @@ public class BoardPanel extends JPanel {
     }
 
 
-    public BoardPanel(Game game, IconManager iM) {
+    public BoardPanel(Game game, IconManager iM, GameFrame gF) {
         super();
+        this.gameFrame = gF;
         this.game = game;
         boardToBeDisplayed = game.getBoard();
         moveIsOnGoing = false;
@@ -166,7 +171,7 @@ public class BoardPanel extends JPanel {
             if(lastSourceRow != sourceRow || lastSourceColumns != sourceColumn)
                 unhighlightSourceTile(sourceRow, sourceColumn);
             kingIsInCheck(game.getTurn());
-            if(BackgroundOverlay.getStaticInstance().checkMate(game.getTurn()))
+            if(checkMate(game.getTurn()))
                 drawCheckMate(game.getTurn());
             Color inverseTurn = game.turn == Color.WHITE ? Color.BLACK : Color.WHITE;
             int kingR = isReversed ? 7-BackgroundOverlay.getStaticInstance().getKingR(inverseTurn) :
@@ -217,7 +222,8 @@ public class BoardPanel extends JPanel {
         setCheckCoords(-1, -1);
     }
 
-    public void processOnlineOpponentMove(Move move){
+    //Both for online and stockfish
+    public void processExternalMove(Move move){
         if(game.isYourTurn()) //Shouldn't happen, but better safe than sorry
             return;
 
@@ -246,50 +252,20 @@ public class BoardPanel extends JPanel {
         kingIsInCheck(Color.BLACK);
         kingIsInCheck(Color.WHITE);
 
-        if(BackgroundOverlay.getStaticInstance().checkMate(Color.BLACK))
+        if(checkMate(Color.BLACK))
             drawCheckMate(Color.BLACK);
-        if(BackgroundOverlay.getStaticInstance().checkMate(Color.WHITE))
+        if(checkMate(Color.WHITE))
             drawCheckMate(Color.WHITE);
 
         game.setYourTurn(true, this);
     }
 
-
-    public void processStockfishMove(Move move) {
-        if(game.isYourTurn()) //Shouldn't happen, but better safe than sorry
-            return;
-
-        int sourceRow = move.getSourceRow(),
-                sourceColumn = move.getSourceColumns(),
-                targetRow = move.getTargetRow(),
-                targetColumn = move.getTargetColumns();
-
-        if(checkR != -1){
-            unhighlightSourceTile(checkR, checkC);
-            setCheckCoords(-1, -1);
-        }
-
-        boolean isEating = boardToBeDisplayed.getPiece(targetRow, targetColumn) != null;
-        if(game.processMove(sourceRow, sourceColumn, targetRow, targetColumn, this)) {
-            Piece tP = boardToBeDisplayed.getPiece(targetRow, targetColumn);
-            clearPiece(sourceRow, sourceColumn);
-            drawPiece(targetRow, targetColumn, tP.getType(), tP.getColor());
-            highlightSourcePiece(sourceRow, sourceColumn);
-            if (isEating)
-                PlaySound.playCapture();
-            else
-                PlaySound.playMove();
-        }
-
-        kingIsInCheck(Color.BLACK);
-        kingIsInCheck(Color.WHITE);
-
-        if(BackgroundOverlay.getStaticInstance().checkMate(Color.BLACK))
-            drawCheckMate(Color.BLACK);
-        if(BackgroundOverlay.getStaticInstance().checkMate(Color.WHITE))
-            drawCheckMate(Color.WHITE);
-
-        game.setYourTurn(true, this);
+    private boolean checkMate(Color c){
+        boolean res = BackgroundOverlay.getStaticInstance().checkMate(c);
+        GameEndBox gameEndBox;
+        if(res)
+            gameEndBox = new GameEndBox(c, gameFrame);
+        return res;
     }
 
     public void processCastling(int r, int kSC, int kTC, int rSC, int rTC){
@@ -394,7 +370,8 @@ public class BoardPanel extends JPanel {
                 for(var c : tiles[pMR][pMC].getComponents())
                     if(c instanceof circle) {
                         tiles[pMR][pMC].remove(c);
-                        break;
+                        //Theoretically we could break, but sometimes,
+                        //if the pc is really slow it happens it looses an event
                     }
                 tiles[pMR][pMC].updateUI();
             }
@@ -411,7 +388,8 @@ public class BoardPanel extends JPanel {
                 unhighlightSourceTile(i, j);
             }
 
-        highlightSourcePiece(lastSourceRow, lastSourceColumns);
+        if(lastSourceRow != -1)
+            highlightSourcePiece(lastSourceRow, lastSourceColumns);
         initializeGame();
 
         if(checkR != -1)

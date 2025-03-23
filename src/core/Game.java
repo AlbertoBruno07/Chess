@@ -1,8 +1,11 @@
 package core;
 
 import engine.Engine;
-import gui.GameFrame.AsideWindow;
-import gui.GameFrame.BoardPanel;
+import gui.asideWindow.AsideWindow;
+import gui.gameFrame.BoardPanel;
+import movesHistory.MovesHistory;
+import onlineComunicationManager.OnlineComunicationManager;
+import scoreBoard.ScoreBoard;
 
 import javax.swing.*;
 import java.util.ArrayList;
@@ -364,5 +367,13 @@ public class Game {
 
     public boolean isStockfishPlaying() {
         return isStockfishPlaying;
+    }
+
+    public OnlineComunicationManager getComunicationManager() {
+        return comunicationManager;
+    }
+
+    public Thread getTimeThread() {
+        return timeThread;
     }
 }

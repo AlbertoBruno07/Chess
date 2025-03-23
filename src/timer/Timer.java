@@ -1,7 +1,7 @@
 package timer;
 
 import core.Color;
-import gui.GameFrame.AsideWindow;
+import gui.asideWindow.AsideWindow;
 
 public class Timer {
     private int initialTime;

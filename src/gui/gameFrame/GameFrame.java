@@ -1,7 +1,9 @@
-package gui.GameFrame;
+package gui.gameFrame;
 
 import core.*;
 import engine.Engine;
+import gui.asideWindow.AsideWindow;
+import onlineComunicationManager.OnlineComunicationManager;
 
 import javax.swing.*;
 import java.awt.*;
@@ -15,7 +17,7 @@ public class GameFrame extends JFrame {
         game = new Game();
         System.out.println("[MakeGame] exT = " + (System.nanoTime() - iniT));
         iniT = System.nanoTime();
-        bP = new BoardPanel(game, iconManager);
+        bP = new BoardPanel(game, iconManager, this);
         System.out.println("[BoardPanel] exT = " + (System.nanoTime() - iniT));
         iniT = System.nanoTime();
         AsideWindow.initializeAsideWindow(bP, game, game.getMovesHistory(), iconManager, icon);

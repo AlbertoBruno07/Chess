@@ -1,7 +1,6 @@
-package gui.GameFrame;
+package gui.gameFrame;
 
-import Settings.Settings;
-import core.Board;
+import settings.Settings;
 import core.PieceType;
 
 import javax.imageio.ImageIO;
@@ -9,7 +8,6 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
-import java.net.MalformedURLException;
 import java.net.URL;
 
 import core.Color;

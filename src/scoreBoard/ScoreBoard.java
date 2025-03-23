@@ -1,6 +1,9 @@
-package core;
+package scoreBoard;
 
-import gui.GameFrame.AsideWindow;
+import core.Color;
+import core.Piece;
+import core.PieceType;
+import gui.asideWindow.AsideWindow;
 
 public class ScoreBoard {
     private int blackPoints, whitePoints;

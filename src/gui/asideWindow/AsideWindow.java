@@ -1,11 +1,13 @@
-package gui.GameFrame;
+package gui.asideWindow;
 
 import core.Game;
 import core.Move;
-import core.MovesHistory;
+import movesHistory.MovesHistory;
 import core.PieceType;
 
-import Settings.Settings;
+import settings.Settings;
+import gui.gameFrame.BoardPanel;
+import gui.gameFrame.IconManager;
 
 import javax.swing.*;
 import java.awt.*;
@@ -20,40 +22,13 @@ public class AsideWindow extends JFrame {
     private JPanel panel;
     private JScrollPane scrollPane;
     private int moveBtnNumber = 0;
-    private MovesHistory movesHistory;
-    private BoardPanel bP;
+    MovesHistory movesHistory;
+    BoardPanel bP;
     private Game game;
     private IconManager iconManager;
     private JLabel whiteTimeLabel, blackTimeLabel;
     private static Semaphore semaphore;
-
-    //Usefull to have some extra attributes accessible straight-forward
-    private static class MoveButton extends JButton{
-        private boolean state;
-        private int id;
-
-        public void changeState(){
-            state = !state;
-        }
-
-        public void reset(){
-            state = false;
-            super.setBackground(Settings.getColor1().equals(Color.DARK_GRAY) ? Color.GRAY : Settings.getColor1());
-        }
-
-        public void clicked(){
-            state = true;
-            super.setBackground(Settings.getColor3());
-        }
-
-        public MoveButton(String text, int id) {
-            super(text);
-            this.id = id;
-            state = false;
-        }
-    }
-
-    private MoveButton clickedButton;
+    MoveButton clickedButton;
     private JLabel whitePoints;
     private JLabel blackPoints;
 
@@ -159,47 +134,7 @@ public class AsideWindow extends JFrame {
         btn.setBackground(Settings.getColor1().equals(Color.DARK_GRAY) ? Color.GRAY : Settings.getColor1());
         btn.setForeground(Color.BLACK);
         btn.setIcon(instance.iconManager.getSmallIcon(m.getSourcePiece().getType(), m.getSourcePiece().getColor()));
-        btn.addActionListener(new ActionListener() {
-            private MoveButton thisButton = btn;
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                SwingUtilities.invokeLater(() -> {
-
-                    if (instance.clickedButton != null)
-                        if(instance.clickedButton != thisButton)
-                            instance.clickedButton.reset();
-
-                    instance.clickedButton = thisButton;
-                    if (!thisButton.state) {
-                        updateScore(core.Color.BLACK, instance.movesHistory.
-                                getMoveScoreBlack(thisButton.id));
-                        updateScore(core.Color.WHITE, instance.movesHistory.
-                                getMoveScoreWhite(thisButton.id));
-                        thisButton.clicked();
-                        isOnPreviewsBoard = true;
-                        instance.bP.setCheckCoords(instance.movesHistory.getMoveCheckR(thisButton.id),
-                                instance.movesHistory.getMoveCheckC(thisButton.id));
-                        instance.bP.setLastSourceCoords(instance.movesHistory.getMoveSourceR(thisButton.id),
-                                instance.movesHistory.getMoveSourceC(thisButton.id));
-                        instance.bP.displayBoard(instance.movesHistory.getMoveBoard(thisButton.id));
-                    }
-                    else {
-                        updateScore(core.Color.BLACK, instance.movesHistory.
-                                getMoveScoreBlack(-1));
-                        updateScore(core.Color.WHITE, instance.movesHistory.
-                                getMoveScoreWhite(-1));
-                        instance.clickedButton = null;
-                        thisButton.reset();
-                        isOnPreviewsBoard = false;
-                        instance.bP.setCheckCoords(instance.movesHistory.getMoveCheckR(-1),
-                                instance.movesHistory.getMoveCheckC(-1));
-                        instance.bP.setLastSourceCoords(instance.movesHistory.getMoveSourceR(-1),
-                                instance.movesHistory.getMoveSourceC(-1));
-                        instance.bP.displayBoard(instance.movesHistory.getMoveBoard(-1));
-                    }
-                });
-            }
-        });
+        btn.addActionListener(new ElementActionListener(btn));
         btn.setAlignmentX(Component.CENTER_ALIGNMENT);
         instance.panel.add(btn);
         SwingUtilities.invokeLater(() -> instance.scrollPane.getVerticalScrollBar()
@@ -258,6 +193,9 @@ public class AsideWindow extends JFrame {
     }
 
     public static void updateTime(core.Color turn, int newTime) {
+        if(instance == null) //Shouldn't happen, but better safe than sorry
+            return;
+
         try {
             semaphore.acquire();
         } catch (InterruptedException e) {

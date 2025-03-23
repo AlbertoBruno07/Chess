@@ -1,4 +1,4 @@
-package Settings;
+package settings;
 
 public class InvalidSettingException extends RuntimeException{
     private String message;

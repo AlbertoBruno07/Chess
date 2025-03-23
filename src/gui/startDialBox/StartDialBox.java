@@ -1,20 +1,16 @@
-package gui.StartDialBox;
+package gui.startDialBox;
 
-import Settings.Settings;
-import core.OnlineComunicationManager;
-import gui.GameFrame.AsideWindow;
-import gui.GameFrame.GameFrame;
-import gui.GameFrame.IconManager;
-import gui.GameFrame.PlaySound;
+import settings.Settings;
+import onlineComunicationManager.OnlineComunicationManager;
+import gui.gameFrame.GameFrame;
+import gui.gameFrame.IconManager;
+import gui.gameFrame.PlaySound;
 
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.concurrent.ExecutionException;
-import java.util.concurrent.Semaphore;
-
-import static core.Color.WHITE;
 
 public class StartDialBox {
 
@@ -29,7 +25,7 @@ public class StartDialBox {
     Thread futureGameFrameMaker;
 
     private JFrame mainFrame;
-    private Image blackIcon;
+    private static Image blackIcon;
     private Image whiteIcon;
     private Image settingsGearIcon;
 
@@ -306,5 +302,9 @@ public class StartDialBox {
             gameFrame.makeVisible();
             mainFrame.setVisible(false);
         }
+    }
+
+    public static Image getBlackIcon() {
+        return blackIcon;
     }
 }

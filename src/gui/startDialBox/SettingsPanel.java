@@ -1,8 +1,8 @@
-package gui.StartDialBox;
+package gui.startDialBox;
 
-import Settings.Settings;
-import gui.GameFrame.IconManager;
-import gui.GameFrame.PlaySound;
+import settings.Settings;
+import gui.gameFrame.IconManager;
+import gui.gameFrame.PlaySound;
 
 import javax.swing.*;
 import java.awt.*;

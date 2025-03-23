@@ -1,6 +1,8 @@
-package core;
+package onlineComunicationManager;
 
-import gui.GameFrame.BoardPanel;
+import core.Board;
+import core.Move;
+import gui.gameFrame.BoardPanel;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -105,7 +107,7 @@ public class OnlineComunicationManager implements Runnable{
     @Override
     public void run() {
         nextOppenentMove = getMove();
-        boardPanel.processOnlineOpponentMove(nextOppenentMove);
+        boardPanel.processExternalMove(nextOppenentMove);
         Thread.currentThread().interrupt();
     }
 

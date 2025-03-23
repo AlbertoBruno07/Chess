@@ -1,4 +1,6 @@
-package gui.GameFrame;
+package gui.gameFrame;
+
+import gui.asideWindow.AsideWindow;
 
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;

@@ -1,7 +1,9 @@
-package core;
+package movesHistory;
 
-import gui.GameFrame.AsideWindow;
-import gui.GameFrame.BoardPanel;
+import core.Board;
+import core.Game;
+import core.Move;
+import gui.asideWindow.AsideWindow;
 
 import java.util.ArrayList;
 

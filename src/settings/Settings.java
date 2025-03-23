@@ -1,11 +1,8 @@
-package Settings;
-
-import netscape.javascript.JSObject;
+package settings;
 
 import java.awt.*;
 import java.io.*;
 import java.util.ArrayList;
-import java.util.concurrent.Semaphore;
 
 public class Settings implements Serializable {
     private String selectedIconPackage;
@@ -73,7 +70,7 @@ public class Settings implements Serializable {
 
     public static void initializeInstance(){
         try{
-            FileInputStream fis = new FileInputStream("./src/Settings/config.jcs");
+            FileInputStream fis = new FileInputStream("./src/settings/config.jcs");
             ObjectInputStream ois = new ObjectInputStream(fis);
             instance = (Settings) ois.readObject();
             ois.close();
@@ -147,7 +144,7 @@ public class Settings implements Serializable {
 
     public static void saveToFile(){
         try {
-            FileOutputStream fout = new FileOutputStream("./src/Settings/config.jcs");
+            FileOutputStream fout = new FileOutputStream("./src/settings/config.jcs");
             ObjectOutputStream oos = new ObjectOutputStream(fout);
             oos.writeObject(getInstance());
             oos.flush();

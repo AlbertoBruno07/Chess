@@ -1,4 +1,4 @@
-package gui.StartDialBox;
+package gui.startDialBox;
 
 public class GuiLauncher {
 
