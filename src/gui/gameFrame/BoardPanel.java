@@ -247,6 +247,7 @@ public class BoardPanel extends JPanel {
                 PlaySound.playCapture();
             else
                 PlaySound.playMove();
+            game.setYourTurn(true, this);
         }
 
         kingIsInCheck(Color.BLACK);
@@ -256,8 +257,6 @@ public class BoardPanel extends JPanel {
             drawCheckMate(Color.BLACK);
         if(checkMate(Color.WHITE))
             drawCheckMate(Color.WHITE);
-
-        game.setYourTurn(true, this);
     }
 
     private boolean checkMate(Color c){
